@@ -10,23 +10,17 @@ const uint16_t map__level[] = {
 	// etc
 };
 
-const uint16_t* map__full_matrix[][1] = {
+const uint16_t map__full_matrix[][1] = {
 	{0}, {0} // TODO do this
 };
 
-const uint16_t* map__top_matrix[][1] = {
+const uint16_t map__top_matrix[][1] = {
 	{0}, {0} // TODO do this
 };
 
 LEDCloudMatrix::LEDCloudMatrix(Adafruit_NeoPixel* strip) {
-	extern const uint16_t* map__level;
-	this->map__level = map__level;
-
-	extern const uint16_t** map__full_matrix;
-	this->map__full_matrix = map__full_matrix;
-
-	extern uint16_t** map__top_matrix;
-	this->map__top_matrix = map__top_matrix;
+	this->raw_strip = strip;
+	this->raw_strip->setBrightness(75);
 }
 
 Adafruit_NeoPixel* LEDCloudMatrix::strip(void) { return this->raw_strip; }

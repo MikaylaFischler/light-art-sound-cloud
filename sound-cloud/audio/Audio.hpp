@@ -12,22 +12,24 @@
 #define AUDIO_FFT_LEFT 0
 #define AUDIO_FFT_RIGHT 0
 
-struct audio {
+class Audio {
+public:
 	AudioInputI2S* board;
 	AudioAnalyzeFFT1024* fft_l;
 	AudioAnalyzeFFT1024* fft_r;
 	AudioConnection* fft_l_conn;
 	AudioConnection* fft_r_conn;
 	float** last_fft;
+
+	Audio(void);
+	~Audio(void) {};
+
+	float** audio_get_fft(void);
 };
 
 // AudioAnalyzeRMS rms1;
 // AudioAnalyzePeak peak1;
 // AudioAnalyzeNoteFrequency notefreq1;
 // AudioAnalyzeToneDetect tone1;
-
-struct audio* audio_create(void);
-void audio_init(struct audio*);
-float** audio_get_fft(struct audio* audio);
 
 #endif

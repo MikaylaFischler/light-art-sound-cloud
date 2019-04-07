@@ -11,6 +11,7 @@ public:
 	~LEDCloudMatrix() {};
 
 	Adafruit_NeoPixel* strip(void);
+	
 	void setPixelColorByFullMatrix(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b);
 	void setPixelColorByFullMatrix(uint8_t x, uint8_t y, uint32_t c);
 	void setPixelColorByTopMatrix(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b);
@@ -19,10 +20,6 @@ public:
 	void setPixelColorByLevel(uint8_t level, uint16_t n, uint32_t c);
 private:
 	Adafruit_NeoPixel* raw_strip;
-
-	const uint16_t** map__full_matrix;
-	const uint16_t** map__top_matrix;
-	const uint16_t* map__level;
 };
 
 #endif
