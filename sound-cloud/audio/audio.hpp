@@ -1,3 +1,6 @@
+#ifndef CLOUD_AUDIO_HPP_
+#define CLOUD_AUDIO_HPP_
+
 #include <Audio.h>
 #include <Wire.h>
 #include <SPI.h>
@@ -26,3 +29,5 @@ struct audio {
 struct audio* audio_create(void);
 void audio_init(struct audio*);
 float** audio_get_fft(struct audio* audio);
+
+#endif

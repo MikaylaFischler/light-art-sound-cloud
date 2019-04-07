@@ -13,6 +13,7 @@ struct audio* audio_create(void) {
  * @param audio Pointer to audio struct
  */
 void audio_init(struct audio* audio) {
+	// create objects for audio processing
 	audio->board = new AudioInputI2S();
 	audio->fft_l = new AudioAnalyzeFFT1024();
 	audio->fft_r = new AudioAnalyzeFFT1024();
