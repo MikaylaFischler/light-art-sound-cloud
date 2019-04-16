@@ -13,6 +13,7 @@
 #include "io/io.h"
 #include "io/config.h"
 #include "led/LEDCloudMatrix.hpp"
+#include "led/Animations.hpp"
 
 Adafruit_NeoPixel row_1_2_led_strip(ROW_1_2_LED_LENGTH, ROW_1_2_LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel row_3_4_led_strip(ROW_3_4_LED_LENGTH, ROW_3_4_LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
