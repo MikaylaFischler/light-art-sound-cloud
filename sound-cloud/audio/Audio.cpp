@@ -2,6 +2,7 @@
 
 /**
  * @brief Initialize an audio object
+ * 
  * @param audio Pointer to audio object
  */
 Audio::Audio(void) {
@@ -20,13 +21,14 @@ Audio::Audio(void) {
 
 /**
  * @brief Get the FFT data if available
+ * 
  * @param audio The audio struct
- * @return Pointer to FFT array or NULL if was not ready
+ * @return Pointer to FFT array of last collected data
  */
-float** Audio::audio_get_fft(void) {
+float** Audio::getFFT(void) {
 	// check availability
 	if (!(this->fft_l->available() && this->fft_r->available())) {
-		return NULL;
+		return this->last_fft;
 	}
 
 	// get data
@@ -38,3 +40,11 @@ float** Audio::audio_get_fft(void) {
 	// return the pointer for ease of use
 	return this->last_fft;
 }
+
+/**
+ * @brief Convert an FFT float bin to a integer
+ * 
+ * @param bin The float value
+ * @return uint8_t 0 to 255 for LED control
+ */
+uint8_t Audio::fftToInt(float bin) { return (uint8_t) round(bin * 255); }

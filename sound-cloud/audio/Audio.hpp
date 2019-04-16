@@ -8,6 +8,7 @@
 #include <SerialFlash.h>
 
 #include <inttypes.h>
+#include "freq_map.h"
 
 #define AUDIO_FFT_LEFT 0
 #define AUDIO_FFT_RIGHT 0
@@ -24,7 +25,8 @@ public:
 	Audio(void);
 	~Audio(void) {};
 
-	float** audio_get_fft(void);
+	float** getFFT(void);
+	uint8_t fftToInt(float bin);
 };
 
 // AudioAnalyzeRMS rms1;
