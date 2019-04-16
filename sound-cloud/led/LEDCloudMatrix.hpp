@@ -14,9 +14,10 @@ typedef struct led_segment {
 class LEDCloudMatrix {
 public:
 	static enum { ROW_1_2, ROW_3_4, TOP } Type;
+	static enum seg_o { COLUMN, ROW } SegmentOrientation;
 
 	LEDCloudMatrix(Adafruit_NeoPixel* row_1_2_strip, Adafruit_NeoPixel* row_3_4_strip, Adafruit_NeoPixel* top_strip);
-	~LEDCloudMatrix() {};
+	~LEDCloudMatrix();
 
 	Adafruit_NeoPixel* strip(uint8_t type) const;
 	uint16_t levelLength(uint8_t level) const;
@@ -26,8 +27,8 @@ public:
 	uint16_t topMatrixHeight(void) const;
 
 	led_segment_t* createSegment(uint8_t strip, uint8_t start, uint8_t length);
-	void mapSegmentToFullMatrix(led_segment_t* segment, uint8_t row, uint8_t col);
-	void mapSegmentToTopMatrix(led_segment_t* segment, uint8_t row, uint8_t col);
+	void mapSegmentToFullMatrix(led_segment_t* segment, uint8_t row, uint8_t col, enum seg_o orientation);
+	void mapSegmentToTopMatrix(led_segment_t* segment, uint8_t row, uint8_t col, enum seg_o orientation);
 	void mapSegmentToLevel(led_segment_t* segment, uint8_t level);
 	
 	void setPixelColorByFullMatrix(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b);
