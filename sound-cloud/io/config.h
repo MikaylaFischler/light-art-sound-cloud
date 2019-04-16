@@ -1,10 +1,14 @@
 #ifndef CLOUD_PIN_DEFS_H_
 #define CLOUD_PIN_DEFS_H_
 
-#define LED_STRIP_PIN 0
-#define LED_LENGTH 0
+#define ROW_1_2_LED_STRIP_PIN 0
+#define ROW_1_2_LED_LENGTH 0
+#define ROW_3_4_LED_STRIP_PIN 0
+#define ROW_3_4_LED_LENGTH 0
+#define TOP_LED_STRIP_PIN 0
+#define TOP_LED_LENGTH 0
 
-#define LED_BRIGHTNESS_PIN 0
+#define LED_BRIGHTNESS_PIN A0
 #define LED_MODE_PIN 0
 
 #endif
