@@ -15,7 +15,8 @@
 
 class Audio {
 public:
-	AudioInputI2S* board;
+	AudioControlSGTL5000* board;
+	AudioInputI2S* input;
 	AudioAnalyzeFFT1024* fft_l;
 	AudioAnalyzeFFT1024* fft_r;
 	AudioConnection* fft_l_conn;

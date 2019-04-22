@@ -7,16 +7,23 @@
  */
 Audio::Audio(void) {
 	// create objects for audio processing
-	this->board = new AudioInputI2S();
+	this->board = new AudioControlSGTL5000();
+	this->input = new AudioInputI2S();
 	this->fft_l = new AudioAnalyzeFFT1024();
 	this->fft_r = new AudioAnalyzeFFT1024();
-	this->fft_l_conn = new AudioConnection(*this->board, 1, *this->fft_l, 0);
-	this->fft_r_conn = new AudioConnection(*this->board, 0, *this->fft_r, 0);
+	this->fft_l_conn = new AudioConnection(*this->input, 1, *this->fft_l, 0);
+	this->fft_r_conn = new AudioConnection(*this->input, 0, *this->fft_r, 0);
 
 	// last FFT data set
 	this->last_fft = (float**) malloc(sizeof(float*) * 2);
 	this->last_fft[AUDIO_FFT_LEFT] = (float*) malloc(sizeof(float) * 512);
 	this->last_fft[AUDIO_FFT_RIGHT] = (float*) malloc(sizeof(float) * 512);
+
+	// setup board
+	this->board->enable();
+	this->board->inputSelect(AUDIO_INPUT_LINEIN);
+	this->board->volume(0.5);
+	this->board->lineInLevel(15);
 }
 
 /**
