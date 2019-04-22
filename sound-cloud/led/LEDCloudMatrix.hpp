@@ -37,6 +37,10 @@ public:
 	void setPixelColorByTopMatrix(uint8_t x, uint8_t y, uint32_t c);
 	void setPixelColorByLevel(uint8_t level, uint16_t n, uint8_t r, uint8_t g, uint8_t b);
 	void setPixelColorByLevel(uint8_t level, uint16_t n, uint32_t c);
+
+	void show(void);
+	void showLevel(uint8_t level);
+	void showTop(void);
 private:
 	Adafruit_NeoPixel* raw_strips[3];
 	

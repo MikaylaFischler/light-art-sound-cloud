@@ -82,7 +82,7 @@ Adafruit_NeoPixel* LEDCloudMatrix::strip(uint8_t id) const { return this->raw_st
  * @param level The level
  * @return uint16_t That level's length
  */
-uint16_t LEDCloudMatrix::levelLength(uint8_t level) const { return this->map__level.r_count; }
+uint16_t LEDCloudMatrix::levelLength(uint8_t level) const { return this->map__level.map[level].length; }
 
 /**
  * @brief Get the width of the full matrix
@@ -141,7 +141,7 @@ void LEDCloudMatrix::mapSegmentToFullMatrix(led_segment_t* segment, uint8_t row,
 	const uint16_t col_max = col + segment->length;
 
 	// make sure we can fit this and update the real lengths if necessary
-	while (this->map__full_matrix.dim >= row_max || this->map__full_matrix.dim >= col_max) { extend_map__full(); }
+	while (row_max >= this->map__full_matrix.dim || col_max >= this->map__full_matrix.dim) { extend_map__full(); }
 	if (this->map__full_matrix.r_x < col_max) { this->map__full_matrix.r_x = col_max; }
 	if (this->map__full_matrix.r_y < row_max) { this->map__full_matrix.r_y = row_max; }
 
@@ -172,7 +172,7 @@ void LEDCloudMatrix::mapSegmentToTopMatrix(led_segment_t* segment, uint8_t row, 
 	const uint16_t col_max = col + segment->length;
 
 	// make sure we can fit this and update the real lengths if necessary
-	while (this->map__top_matrix.dim >= row_max || this->map__top_matrix.dim >= col_max) { extend_map__top(); }
+	while (row_max >= this->map__top_matrix.dim || col_max >= this->map__top_matrix.dim) { extend_map__top(); }
 	if (this->map__top_matrix.r_x < col_max) { this->map__top_matrix.r_x = col_max; }
 	if (this->map__top_matrix.r_y < row_max) { this->map__top_matrix.r_y = row_max; }
 
@@ -198,10 +198,10 @@ void LEDCloudMatrix::mapSegmentToTopMatrix(led_segment_t* segment, uint8_t row, 
  */
 void LEDCloudMatrix::mapSegmentToLevel(led_segment_t* segment, uint8_t level) {
 	// make sure we can fit this and update the real length if necessary
-	while (this->map__level.dim >= level) { extend_map__level(); }
+	while (level >= this->map__level.dim) { extend_map__level(); }
 	if (this->map__level.r_count < level + 1) { this->map__level.r_count = level + 1; }
 
-	// set the map map
+	// set the map
 	this->map__level.map[level].strip_id = segment->id;
 	this->map__level.map[level].offset = segment->offset;
 }
@@ -269,7 +269,7 @@ void LEDCloudMatrix::setPixelColorByTopMatrix(uint8_t x, uint8_t y, uint32_t c) 
  */
 void LEDCloudMatrix::setPixelColorByLevel(uint8_t level, uint16_t n, uint8_t r, uint8_t g, uint8_t b) {
 	struct px_level* m = &(this->map__level.map[level]);
-	this->raw_strips[m->strip_id]->setPixelColor(m->offset, r, g, b);
+	this->raw_strips[m->strip_id]->setPixelColor(m->offset + n, r, g, b);
 }
 
 /**
@@ -281,7 +281,36 @@ void LEDCloudMatrix::setPixelColorByLevel(uint8_t level, uint16_t n, uint8_t r, 
  */
 void LEDCloudMatrix::setPixelColorByLevel(uint8_t level, uint16_t n, uint32_t c) {
 	struct px_level* m = &(this->map__level.map[level]);
-	this->raw_strips[m->strip_id]->setPixelColor(m->offset, c);
+	this->raw_strips[m->strip_id]->setPixelColor(m->offset + n, c);
+}
+
+/**
+ * @brief Show all LED strips (write the changes)
+ * 
+ */
+void LEDCloudMatrix::show(void) {
+	for (uint8_t i = 0; i < 3; i++) { raw_strips[i]->show(); }
+}
+
+/**
+ * @brief Show the LED strip corresponding to the level (write the changes)
+ * 
+ * @param level The level to update
+ */
+void LEDCloudMatrix::showLevel(uint8_t level) {
+	if (level == 0 || level == 1) {
+		raw_strips[LEDCloudMatrix::ROW_1_2]->show();
+	} else if (level == 2 || level == 3) {
+		raw_strips[LEDCloudMatrix::ROW_3_4]->show();
+	}
+}
+
+/**
+ * @brief Show the top LED strip (write the changes)
+ * 
+ */
+void LEDCloudMatrix::showTop(void) {
+	raw_strips[LEDCloudMatrix::TOP]->show();
 }
 
 /**
