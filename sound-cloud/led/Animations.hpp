@@ -1,23 +1,49 @@
 #ifndef CLOUD_ANIMATIONS_HPP_
 #define CLOUD_ANIMATIONS_HPP_
 
+#include "color.h"
 #include "../audio/Audio.hpp"
 #include "LEDCloudMatrix.hpp"
 
 class Animations {
 	public:
 		static void linkCloudMatrix(LEDCloudMatrix* lcm);
-		static void linKAudio(Audio* audio);
+		static void linkAudio(Audio* audio);
 
 		// basic functions
-		static void set_AllOff(void);
+		static void allOff(void);
 
+		class Standby {
+			public:
+				static void solidSoftWhite(void);
+				static void whiteWave(void);
+				static void cloudToCloudLighting(void);
+				static void rainbowWash(void);
+				static void rainbowFade(void);
+		};
+
+		class Simple {
+			public:
+				// static void bassRangePulse(void);
+				// static void bassTreblePulse(void);
+				// static void noteFlash(void);
+				// static void linearVisualizer3D(void);
+		};
+
+		class Complex {
+			public:
+				// static void bassFlow(void);
+		};
 	private:
 		Animations() {};
 		virtual ~Animations() {};
-
+	
 		static LEDCloudMatrix* lcm;
 		static Audio* audio;
+
+		friend class Animations::Standby;
+		friend class Animations::Simple;
+		friend class Animations::Complex;
 };
 
 #endif
