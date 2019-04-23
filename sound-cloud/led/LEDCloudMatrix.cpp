@@ -1,5 +1,7 @@
 #include "LEDCloudMatrix.hpp"
 
+using namespace LEDCloudMatrix;
+
 /**
  * @brief Constructor for a Cloud Matrix
  * 
@@ -7,11 +9,11 @@
  * @param row_3_4_strip The strip for rows 3 and 4
  * @param top_strip The strip for the top LEDs
  */
-LEDCloudMatrix::LEDCloudMatrix(Adafruit_NeoPixel* row_1_2_strip, Adafruit_NeoPixel* row_3_4_strip, Adafruit_NeoPixel* top_strip) {
+LEDCloudControl::LEDCloudControl(Adafruit_NeoPixel* row_1_2_strip, Adafruit_NeoPixel* row_3_4_strip, Adafruit_NeoPixel* top_strip) {
 	// store strips
-	this->raw_strips[strip_t::ROW_1_2] = row_1_2_strip;
-	this->raw_strips[strip_t::ROW_3_4] = row_3_4_strip;
-	this->raw_strips[strip_t::TOP] = top_strip;
+	this->raw_strips[strip_t::S_R12] = row_1_2_strip;
+	this->raw_strips[strip_t::S_R34] = row_3_4_strip;
+	this->raw_strips[strip_t::S_TOP] = top_strip;
 	
 	// default brightness
 	for (uint8_t i = 0; i < 3; i++) {
@@ -46,10 +48,10 @@ LEDCloudMatrix::LEDCloudMatrix(Adafruit_NeoPixel* row_1_2_strip, Adafruit_NeoPix
 }
 
 /**
- * @brief Destroy the LEDCloudMatrix::LEDCloudMatrix object
+ * @brief Destroy the LEDCloudControl::LEDCloudControl object
  * @note Frees the map matricies/arrays
  */
-LEDCloudMatrix::~LEDCloudMatrix() {
+LEDCloudControl::~LEDCloudControl() {
 	// free zones
 	for (uint8_t z = 0; z < 4; z++) {
 		for (uint8_t i = 0; i < zones[z].dim; i++) { free(zones[z].map[i]); }
@@ -66,7 +68,7 @@ LEDCloudMatrix::~LEDCloudMatrix() {
  * @param id Strip ID
  * @return Adafruit_NeoPixel* selected strip
  */
-Adafruit_NeoPixel* LEDCloudMatrix::strip(strip_t id) const { return this->raw_strips[id]; }
+Adafruit_NeoPixel* LEDCloudControl::strip(strip_t id) const { return this->raw_strips[id]; }
 
 /**
  * @brief Get the length of a particular level
@@ -74,21 +76,21 @@ Adafruit_NeoPixel* LEDCloudMatrix::strip(strip_t id) const { return this->raw_st
  * @param level The level
  * @return uint16_t That level's length
  */
-uint16_t LEDCloudMatrix::levelLength(uint8_t level) const { return levels.map[level].length; }
+uint16_t LEDCloudControl::levelLength(uint8_t level) const { return levels.map[level].length; }
 
 /**
  * @brief Get the width of a zone
  * 
  * @return uint16_t Width
  */
-uint16_t LEDCloudMatrix::zoneWidth(zone_t zone_id) const { return zones[zone_id].r_w; }
+uint16_t LEDCloudControl::zoneWidth(zone_t zone_id) const { return zones[zone_id].r_w; }
 
 /**
  * @brief Get the height of a zone
  * 
  * @return uint16_t Height
  */
-uint16_t LEDCloudMatrix::zoneHeight(zone_t zone_id) const { return zones[zone_id].r_h; }
+uint16_t LEDCloudControl::zoneHeight(zone_t zone_id) const { return zones[zone_id].r_h; }
 
 /**
  * @brief Create a segment from a strip
@@ -98,7 +100,7 @@ uint16_t LEDCloudMatrix::zoneHeight(zone_t zone_id) const { return zones[zone_id
  * @param length The length
  * @return led_segment_t* The new segment object
  */
-led_segment_t* LEDCloudMatrix::createSegment(uint8_t strip, uint8_t start, uint8_t length) {
+led_segment_t* LEDCloudControl::createSegment(strip_t strip, uint8_t start, uint8_t length) {
 	led_segment_t* seg = (led_segment_t*) malloc(sizeof(led_segment_t));
 	seg->strip_id = strip;
 	seg->offset = start;
@@ -110,15 +112,13 @@ led_segment_t* LEDCloudMatrix::createSegment(uint8_t strip, uint8_t start, uint8
  * @brief Map a segment to a zone
  * 
  * @param segment The segment to map
- * @param row The starting row
- * @param col The starting column
+ * @param row The starting row (where the lowest LED index is)
+ * @param col The starting column (where the lowest LED index is)
  * @param orientation The orientation for the segment in the matrix
  */
-void LEDCloudMatrix::mapSegmentToZone(led_segment_t* segment, zone_t zone_id, uint8_t row, uint8_t col, seg_o_t orientation) {
+void LEDCloudControl::mapSegmentToZone(led_segment_t* segment, zone_t zone_id, uint8_t row, uint8_t col, seg_o_t orientation) {
 	const uint16_t row_max = row + segment->length;
-	const uint16_t row_min = row - segment->length;
 	const uint16_t col_max = col + segment->length;
-	const uint16_t col_min = col - segment->length;
 	
 	// map the segment
 	switch (orientation) {
@@ -175,7 +175,7 @@ void LEDCloudMatrix::mapSegmentToZone(led_segment_t* segment, zone_t zone_id, ui
  * @param segment The segment to map
  * @param level The level to map to
  */
-void LEDCloudMatrix::mapSegmentToLevel(led_segment_t* segment, uint8_t level) {
+void LEDCloudControl::mapSegmentToLevel(led_segment_t* segment, uint8_t level) {
 	// make sure we can fit this and update the real length if necessary
 	while (level >= levels.dim) { extend_level(); }
 	if (levels.r_dim < level + 1) { levels.r_dim = level + 1; }
@@ -195,7 +195,7 @@ void LEDCloudMatrix::mapSegmentToLevel(led_segment_t* segment, uint8_t level) {
  * @param g Green value
  * @param b Blue value
  */
-void LEDCloudMatrix::setPixelColorByZone(zone_t zone_id, uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
+void LEDCloudControl::setPixelColorByZone(zone_t zone_id, uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
 	struct px_map* m = &(zones[zone_id].map[x][y]);
 	this->raw_strips[m->strip_id]->setPixelColor(m->offset, r, g, b);
 }
@@ -208,7 +208,7 @@ void LEDCloudMatrix::setPixelColorByZone(zone_t zone_id, uint8_t x, uint8_t y, u
  * @param y Y coordinate (row)
  * @param c 32-bit color
  */
-void LEDCloudMatrix::setPixelColorByZone(zone_t zone_id, uint8_t x, uint8_t y, uint32_t c) {
+void LEDCloudControl::setPixelColorByZone(zone_t zone_id, uint8_t x, uint8_t y, uint32_t c) {
 	struct px_map* m = &(zones[zone_id].map[x][y]);
 	this->raw_strips[m->strip_id]->setPixelColor(m->offset, c);
 }
@@ -222,7 +222,7 @@ void LEDCloudMatrix::setPixelColorByZone(zone_t zone_id, uint8_t x, uint8_t y, u
  * @param g Green value
  * @param b Blue value
  */
-void LEDCloudMatrix::setPixelColorByLevel(uint8_t level, uint16_t n, uint8_t r, uint8_t g, uint8_t b) {
+void LEDCloudControl::setPixelColorByLevel(uint8_t level, uint16_t n, uint8_t r, uint8_t g, uint8_t b) {
 	struct px_level* m = &(levels.map[level]);
 	this->raw_strips[m->strip_id]->setPixelColor(m->offset + n, r, g, b);
 }
@@ -234,7 +234,7 @@ void LEDCloudMatrix::setPixelColorByLevel(uint8_t level, uint16_t n, uint8_t r, 
  * @param x N pixels from start of level
  * @param c 32-bit color
  */
-void LEDCloudMatrix::setPixelColorByLevel(uint8_t level, uint16_t n, uint32_t c) {
+void LEDCloudControl::setPixelColorByLevel(uint8_t level, uint16_t n, uint32_t c) {
 	struct px_level* m = &(this->levels.map[level]);
 	this->raw_strips[m->strip_id]->setPixelColor(m->offset + n, c);
 }
@@ -243,7 +243,7 @@ void LEDCloudMatrix::setPixelColorByLevel(uint8_t level, uint16_t n, uint32_t c)
  * @brief Show all LED strips (write the changes)
  * 
  */
-void LEDCloudMatrix::show(void) {
+void LEDCloudControl::show(void) {
 	for (uint8_t i = 0; i < 3; i++) { raw_strips[i]->show(); }
 }
 
@@ -252,11 +252,11 @@ void LEDCloudMatrix::show(void) {
  * 
  * @param level The level to update
  */
-void LEDCloudMatrix::showLevel(uint8_t level) {
+void LEDCloudControl::showLevel(uint8_t level) {
 	if (level == 0 || level == 1) {
-		raw_strips[strip_t::ROW_1_2]->show();
+		raw_strips[strip_t::S_R12]->show();
 	} else if (level == 2 || level == 3) {
-		raw_strips[strip_t::ROW_3_4]->show();
+		raw_strips[strip_t::S_R34]->show();
 	}
 }
 
@@ -264,17 +264,17 @@ void LEDCloudMatrix::showLevel(uint8_t level) {
  * @brief Show LED strip(s) by zone (write the changes)
  * 
  */
-void LEDCloudMatrix::showZone(zone_t zone_id) {
+void LEDCloudControl::showZone(zone_t zone_id) {
 	switch (zone_id) {
 		case zone_t::RIGHT:
 		case zone_t::FRONT:
 		case zone_t::LEFT:
-			raw_strips[strip_t::ROW_1_2]->show();
-			raw_strips[strip_t::ROW_3_4]->show();
+			raw_strips[strip_t::S_R12]->show();
+			raw_strips[strip_t::S_R34]->show();
 			break;
 		case zone_t::TOP:
-			raw_strips[strip_t::ROW_3_4]->show();
-			raw_strips[strip_t::TOP]->show();
+			raw_strips[strip_t::S_R34]->show();
+			raw_strips[strip_t::S_TOP]->show();
 			break;
 	}
 }
@@ -284,7 +284,7 @@ void LEDCloudMatrix::showZone(zone_t zone_id) {
  * 
  * @param zone_id The zone's identifier
  */
-void LEDCloudMatrix::extend_zone(zone_t zone_id) {
+void LEDCloudControl::extend_zone(zone_t zone_id) {
 	uint16_t old_size = zones[zone_id].dim;
 	zones[zone_id].dim += 15;
 
@@ -316,7 +316,7 @@ void LEDCloudMatrix::extend_zone(zone_t zone_id) {
 /**
  * @brief Extend the size of the level map array
  */
-void LEDCloudMatrix::extend_level(void) {
+void LEDCloudControl::extend_level(void) {
 	levels.dim += 5;
 
 	// create new map

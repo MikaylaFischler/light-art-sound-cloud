@@ -5,9 +5,11 @@
 #include "../audio/Audio.hpp"
 #include "LEDCloudMatrix.hpp"
 
+using namespace LEDCloudMatrix;
+
 class Animations {
 	public:
-		static void linkCloudMatrix(LEDCloudMatrix* lcm);
+		static void linkCloudControl(LEDCloudControl* lcm);
 		static void linkAudio(Audio* audio);
 
 		// basic functions
@@ -38,7 +40,7 @@ class Animations {
 		Animations() {};
 		virtual ~Animations() {};
 	
-		static LEDCloudMatrix* lcm;
+		static LEDCloudControl* lcm;
 		static Audio* audio;
 
 		friend class Animations::Standby;
