@@ -39,6 +39,15 @@ namespace LEDCloudMatrix {
 		void setPixelColorByLevel(uint8_t level, uint16_t n, uint8_t r, uint8_t g, uint8_t b);
 		void setPixelColorByLevel(uint8_t level, uint16_t n, uint32_t c);
 
+		void setAll(uint8_t r, uint8_t g, uint8_t b);
+		void setAll(uint32_t c);
+		void setZone(uint8_t r, uint8_t g, uint8_t b);
+		void setZone(uint32_t c);
+		void setZoneRow(uint8_t r, uint8_t g, uint8_t b);
+		void setZoneRow(uint32_t c);
+		void setZoneCol(uint8_t r, uint8_t g, uint8_t b);
+		void setZoneCol(uint32_t c);
+
 		void show(void);
 		void showLevel(uint8_t level);
 		void showZone(zone_t zone_id);
