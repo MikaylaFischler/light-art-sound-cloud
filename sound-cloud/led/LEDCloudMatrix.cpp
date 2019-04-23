@@ -9,63 +9,55 @@
  */
 LEDCloudMatrix::LEDCloudMatrix(Adafruit_NeoPixel* row_1_2_strip, Adafruit_NeoPixel* row_3_4_strip, Adafruit_NeoPixel* top_strip) {
 	// store strips
-	this->raw_strips[LEDCloudMatrix::ROW_1_2] = row_1_2_strip;
-	this->raw_strips[LEDCloudMatrix::ROW_3_4] = row_3_4_strip;
-	this->raw_strips[LEDCloudMatrix::TOP] = top_strip;
+	this->raw_strips[strip_t::ROW_1_2] = row_1_2_strip;
+	this->raw_strips[strip_t::ROW_3_4] = row_3_4_strip;
+	this->raw_strips[strip_t::TOP] = top_strip;
 	
 	// default brightness
 	for (uint8_t i = 0; i < 3; i++) {
-		this->raw_strips[i]->setBrightness(75);
+		this->raw_strips[i]->setBrightness(150);
 		this->raw_strips[i]->show();
 	}
 
-	// zero segment ID start
-	next_seg_id = 0;
+	// allocate zones
+	for (uint8_t i = 0; i < 4; i++) {
+		zones[i].dim = 15;
+		zones[i].r_w = zones[i].r_h = 0;
+		zones[i].map = (struct px_map**) malloc(sizeof(struct px_map*) * zones[i].dim);
 
-	// allocate maps
-	this->map__full_matrix.dim = 50;
-	this->map__full_matrix.r_x = this->map__full_matrix.r_y = 0;
-	this->map__full_matrix.map = (struct px_map**) malloc(sizeof(struct px_map*) * this->map__full_matrix.dim);
-	for (uint8_t i = 0; i < this->map__full_matrix.dim; i++) {
-		this->map__full_matrix.map[i] = (struct px_map*) malloc(sizeof(struct px_map) * this->map__full_matrix.dim);
-		for (uint8_t j = 0; j < this->map__full_matrix.dim; j++) {
-			this->map__full_matrix.map[i][j].strip_id = -1;	// mark invalid
+		for (uint8_t y = 0; y < zones[i].dim; y++) {
+			zones[i].map[y] = (struct px_map*) malloc(sizeof(struct px_map) * zones[i].dim);
+
+			// mark cells invalid
+			for (uint8_t x = 0; x < zones[i].dim; x++) {
+				zones[i].map[y][x].strip_id = -1;
+			}
 		}
 	}
 
-	this->map__top_matrix.dim = 20;
-	this->map__top_matrix.r_x = this->map__top_matrix.r_y = 0;
-	this->map__top_matrix.map = (struct px_map**) malloc(sizeof(struct px_map*) * this->map__top_matrix.dim);
-	for (uint8_t i = 0; i < this->map__top_matrix.dim; i++) {
-		this->map__top_matrix.map[i] = (struct px_map*) malloc(sizeof(struct px_map) * this->map__top_matrix.dim);
-		for (uint8_t j = 0; j < this->map__top_matrix.dim; j++) {
-			this->map__top_matrix.map[i][j].strip_id = -1;	// mark invalid
-		}
-	}
+	// allocate levels
+	levels.dim = 5;
+	levels.r_dim = 0;
+	levels.map = (struct px_level*) malloc(sizeof(struct px_level) * levels.dim);
 
-	this->map__level.dim = 5;
-	this->map__level.r_count = 0;
-	this->map__level.map = (struct px_level*) malloc(sizeof(struct px_level) * this->map__level.dim);
-	for (uint8_t i = 0; i < this->map__top_matrix.dim; i++) {
-		this->map__level.map[i].strip_id = -1;	// mark invalid
+	for (uint8_t i = 0; i < levels.dim; i++) {
+		levels.map[i].strip_id = -1;	// mark invalid
 	}
 }
 
 /**
  * @brief Destroy the LEDCloudMatrix::LEDCloudMatrix object
- * @note Frees the three map matricies/arrays
+ * @note Frees the map matricies/arrays
  */
 LEDCloudMatrix::~LEDCloudMatrix() {
-	// free full matrix
-	for (uint8_t i = 0; i < this->map__full_matrix.dim; i++) { free(this->map__full_matrix.map[i]); }
-	free(this->map__full_matrix.map);
-
-	// free top matrix
-	for (uint8_t i = 0; i < this->map__top_matrix.dim; i++) { free(this->map__top_matrix.map[i]); }
-	free(this->map__top_matrix.map);
+	// free zones
+	for (uint8_t z = 0; z < 4; z++) {
+		for (uint8_t i = 0; i < zones[z].dim; i++) { free(zones[z].map[i]); }
+		free(zones[z].map);
+	}
 
 	// free level map
-	free(this->map__level.map);
+	free(levels.map);
 }
 
 /**
@@ -74,7 +66,7 @@ LEDCloudMatrix::~LEDCloudMatrix() {
  * @param id Strip ID
  * @return Adafruit_NeoPixel* selected strip
  */
-Adafruit_NeoPixel* LEDCloudMatrix::strip(uint8_t id) const { return this->raw_strips[id]; }
+Adafruit_NeoPixel* LEDCloudMatrix::strip(strip_t id) const { return this->raw_strips[id]; }
 
 /**
  * @brief Get the length of a particular level
@@ -82,35 +74,21 @@ Adafruit_NeoPixel* LEDCloudMatrix::strip(uint8_t id) const { return this->raw_st
  * @param level The level
  * @return uint16_t That level's length
  */
-uint16_t LEDCloudMatrix::levelLength(uint8_t level) const { return this->map__level.map[level].length; }
+uint16_t LEDCloudMatrix::levelLength(uint8_t level) const { return levels.map[level].length; }
 
 /**
- * @brief Get the width of the full matrix
+ * @brief Get the width of a zone
  * 
  * @return uint16_t Width
  */
-uint16_t LEDCloudMatrix::fullMatrixWidth(void) const { return this->map__full_matrix.r_x; }
+uint16_t LEDCloudMatrix::zoneWidth(zone_t zone_id) const { return zones[zone_id].r_w; }
 
 /**
- * @brief Get the height of the full matrix
+ * @brief Get the height of a zone
  * 
  * @return uint16_t Height
  */
-uint16_t LEDCloudMatrix::fullMatrixHeight(void) const { return this->map__full_matrix.r_y; }
-
-/**
- * @brief Get the width of the top matrix
- * 
- * @return uint16_t Width
- */
-uint16_t LEDCloudMatrix::topMatrixWidth(void) const { return this->map__top_matrix.r_x; }
-
-/**
- * @brief Get the height of the top matrix
- * 
- * @return uint16_t Height
- */
-uint16_t LEDCloudMatrix::topMatrixHeight(void) const { return this->map__top_matrix.r_y; }
+uint16_t LEDCloudMatrix::zoneHeight(zone_t zone_id) const { return zones[zone_id].r_h; }
 
 /**
  * @brief Create a segment from a strip
@@ -122,71 +100,72 @@ uint16_t LEDCloudMatrix::topMatrixHeight(void) const { return this->map__top_mat
  */
 led_segment_t* LEDCloudMatrix::createSegment(uint8_t strip, uint8_t start, uint8_t length) {
 	led_segment_t* seg = (led_segment_t*) malloc(sizeof(led_segment_t));
-	seg->id = next_seg_id++;
+	seg->strip_id = strip;
 	seg->offset = start;
 	seg->length = length;
 	return seg;
 }
 
 /**
- * @brief Map a segment to the full matrix
+ * @brief Map a segment to a zone
  * 
  * @param segment The segment to map
  * @param row The starting row
  * @param col The starting column
  * @param orientation The orientation for the segment in the matrix
  */
-void LEDCloudMatrix::mapSegmentToFullMatrix(led_segment_t* segment, uint8_t row, uint8_t col, enum seg_o orientation) {
+void LEDCloudMatrix::mapSegmentToZone(led_segment_t* segment, zone_t zone_id, uint8_t row, uint8_t col, seg_o_t orientation) {
 	const uint16_t row_max = row + segment->length;
+	const uint16_t row_min = row - segment->length;
 	const uint16_t col_max = col + segment->length;
-
-	// make sure we can fit this and update the real lengths if necessary
-	while (row_max >= this->map__full_matrix.dim || col_max >= this->map__full_matrix.dim) { extend_map__full(); }
-	if (this->map__full_matrix.r_x < col_max) { this->map__full_matrix.r_x = col_max; }
-	if (this->map__full_matrix.r_y < row_max) { this->map__full_matrix.r_y = row_max; }
-
+	const uint16_t col_min = col - segment->length;
+	
 	// map the segment
-	if (orientation == COLUMN) {
-		for (uint16_t r = 0; r < segment->length; r++) {
-			this->map__full_matrix.map[row + r][col].strip_id = segment->id;
-			this->map__full_matrix.map[row + r][col].offset = segment->offset + r;
-		}
-	} else {
-		for (uint16_t c = 0; c < segment->length; c++) {
-			this->map__full_matrix.map[row][col + c].strip_id = segment->id;
-			this->map__full_matrix.map[row][col + c].offset = segment->offset + c;
-		}
-	}
-}
+	switch (orientation) {
+		case COLUMN_POS:
+			// make sure we can fit this and update the real lengths if necessary
+			while (row_max >= zones[zone_id].dim || col >= zones[zone_id].dim) { extend_zone(zone_id); }
+			if (zones[zone_id].r_w < col) { zones[zone_id].r_w = col; }
+			if (zones[zone_id].r_h < row_max) { zones[zone_id].r_h = row_max; }
 
-/**
- * @brief Map a segment to the top matrix
- * 
- * @param segment The segment to map
- * @param row The starting row
- * @param col The starting column
- * @param orientation The orientation for the segment in the matrix
- */
-void LEDCloudMatrix::mapSegmentToTopMatrix(led_segment_t* segment, uint8_t row, uint8_t col, enum seg_o orientation) {
-	const uint16_t row_max = row + segment->length;
-	const uint16_t col_max = col + segment->length;
+			for (uint16_t r = 0; r < segment->length; r++) {
+				zones[zone_id].map[row + r][col].strip_id = segment->strip_id;
+				zones[zone_id].map[row + r][col].offset = segment->offset + r;
+			}
+		break;
+		case COLUMN_NEG:
+			// make sure we can fit this and update the real lengths if necessary
+			while (row >= zones[zone_id].dim || col >= zones[zone_id].dim) { extend_zone(zone_id); }
+			if (zones[zone_id].r_w < col) { zones[zone_id].r_w = col; }
+			if (zones[zone_id].r_h < row) { zones[zone_id].r_h = row; }
 
-	// make sure we can fit this and update the real lengths if necessary
-	while (row_max >= this->map__top_matrix.dim || col_max >= this->map__top_matrix.dim) { extend_map__top(); }
-	if (this->map__top_matrix.r_x < col_max) { this->map__top_matrix.r_x = col_max; }
-	if (this->map__top_matrix.r_y < row_max) { this->map__top_matrix.r_y = row_max; }
+			for (uint16_t r = 0; r < segment->length && (row - r) >= 0; r++) {
+				zones[zone_id].map[row - r][col].strip_id = segment->strip_id;
+				zones[zone_id].map[row - r][col].offset = segment->offset + r;
+			}
+		break;
+		case ROW_POS:
+			// make sure we can fit this and update the real lengths if necessary
+			while (row >= zones[zone_id].dim || col_max >= zones[zone_id].dim) { extend_zone(zone_id); }
+			if (zones[zone_id].r_w < col_max) { zones[zone_id].r_w = col_max; }
+			if (zones[zone_id].r_h < row) { zones[zone_id].r_h = row; }
 
-	// map the segment
-	if (orientation == COLUMN) {
-		for (uint16_t r = 0; r < segment->length; r++) {
-			this->map__top_matrix.map[row + r][col].strip_id = segment->id;
-			this->map__top_matrix.map[row + r][col].offset = segment->offset + r;
-		}
-	} else {
-		for (uint16_t c = 0; c < segment->length; c++) {
-			this->map__top_matrix.map[row][col + c].strip_id = segment->id;
-			this->map__top_matrix.map[row][col + c].offset = segment->offset + c;
-		}
+			for (uint16_t c = 0; c < segment->length; c++) {
+				zones[zone_id].map[row][col + c].strip_id = segment->strip_id;
+				zones[zone_id].map[row][col + c].offset = segment->offset + c;
+			}
+		break;
+		case ROW_NEG:
+			// make sure we can fit this and update the real lengths if necessary
+			while (row >= zones[zone_id].dim || col >= zones[zone_id].dim) { extend_zone(zone_id); }
+			if (zones[zone_id].r_w < col) { zones[zone_id].r_w = col; }
+			if (zones[zone_id].r_h < row) { zones[zone_id].r_h = row; }
+
+			for (uint16_t c = 0; c < segment->length && (col - c); c++) {
+				zones[zone_id].map[row][col - c].strip_id = segment->strip_id;
+				zones[zone_id].map[row][col - c].offset = segment->offset + c;
+			}
+		break;
 	}
 }
 
@@ -198,63 +177,39 @@ void LEDCloudMatrix::mapSegmentToTopMatrix(led_segment_t* segment, uint8_t row, 
  */
 void LEDCloudMatrix::mapSegmentToLevel(led_segment_t* segment, uint8_t level) {
 	// make sure we can fit this and update the real length if necessary
-	while (level >= this->map__level.dim) { extend_map__level(); }
-	if (this->map__level.r_count < level + 1) { this->map__level.r_count = level + 1; }
+	while (level >= levels.dim) { extend_level(); }
+	if (levels.r_dim < level + 1) { levels.r_dim = level + 1; }
 
 	// set the map
-	this->map__level.map[level].strip_id = segment->id;
-	this->map__level.map[level].offset = segment->offset;
+	levels.map[level].strip_id = segment->strip_id;
+	levels.map[level].offset = segment->offset;
 }
 
 /**
- * @brief Set a pixel color via the full matrix
+ * @brief Set a pixel color via zones
  * 
+ * @param zone_id The zone's ID
  * @param x X coordinate (column)
  * @param y Y coordinate (row)
  * @param r Red value
  * @param g Green value
  * @param b Blue value
  */
-void LEDCloudMatrix::setPixelColorByFullMatrix(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
-	struct px_map* m = &(this->map__full_matrix.map[x][y]);
+void LEDCloudMatrix::setPixelColorByZone(zone_t zone_id, uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
+	struct px_map* m = &(zones[zone_id].map[x][y]);
 	this->raw_strips[m->strip_id]->setPixelColor(m->offset, r, g, b);
 }
 
 /**
- * @brief Set a pixel color via the full matrix
+ * @brief Set a pixel color via zones
  * 
+ * @param zone_id The zone's ID
  * @param x X coordinate (column)
  * @param y Y coordinate (row)
  * @param c 32-bit color
  */
-void LEDCloudMatrix::setPixelColorByFullMatrix(uint8_t x, uint8_t y, uint32_t c) {
-	struct px_map* m = &(this->map__full_matrix.map[x][y]);
-	this->raw_strips[m->strip_id]->setPixelColor(m->offset, c);
-}
-
-/**
- * @brief Set a pixel color via the top matrix
- * 
- * @param x X coordinate (column)
- * @param y Y coordinate (row)
- * @param r Red value
- * @param g Green value
- * @param b Blue value
- */
-void LEDCloudMatrix::setPixelColorByTopMatrix(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
-	struct px_map* m = &(this->map__full_matrix.map[x][y]);
-	this->raw_strips[m->strip_id]->setPixelColor(m->offset, r, g, b);
-}
-
-/**
- * @brief Set a pixel color via the top matrix
- * 
- * @param x X coordinate (column)
- * @param y Y coordinate (row)
- * @param c 32-bit color
- */
-void LEDCloudMatrix::setPixelColorByTopMatrix(uint8_t x, uint8_t y, uint32_t c) {
-	struct px_map* m = &(this->map__top_matrix.map[x][y]);
+void LEDCloudMatrix::setPixelColorByZone(zone_t zone_id, uint8_t x, uint8_t y, uint32_t c) {
+	struct px_map* m = &(zones[zone_id].map[x][y]);
 	this->raw_strips[m->strip_id]->setPixelColor(m->offset, c);
 }
 
@@ -268,7 +223,7 @@ void LEDCloudMatrix::setPixelColorByTopMatrix(uint8_t x, uint8_t y, uint32_t c) 
  * @param b Blue value
  */
 void LEDCloudMatrix::setPixelColorByLevel(uint8_t level, uint16_t n, uint8_t r, uint8_t g, uint8_t b) {
-	struct px_level* m = &(this->map__level.map[level]);
+	struct px_level* m = &(levels.map[level]);
 	this->raw_strips[m->strip_id]->setPixelColor(m->offset + n, r, g, b);
 }
 
@@ -280,7 +235,7 @@ void LEDCloudMatrix::setPixelColorByLevel(uint8_t level, uint16_t n, uint8_t r, 
  * @param c 32-bit color
  */
 void LEDCloudMatrix::setPixelColorByLevel(uint8_t level, uint16_t n, uint32_t c) {
-	struct px_level* m = &(this->map__level.map[level]);
+	struct px_level* m = &(this->levels.map[level]);
 	this->raw_strips[m->strip_id]->setPixelColor(m->offset + n, c);
 }
 
@@ -299,105 +254,87 @@ void LEDCloudMatrix::show(void) {
  */
 void LEDCloudMatrix::showLevel(uint8_t level) {
 	if (level == 0 || level == 1) {
-		raw_strips[LEDCloudMatrix::ROW_1_2]->show();
+		raw_strips[strip_t::ROW_1_2]->show();
 	} else if (level == 2 || level == 3) {
-		raw_strips[LEDCloudMatrix::ROW_3_4]->show();
+		raw_strips[strip_t::ROW_3_4]->show();
 	}
 }
 
 /**
- * @brief Show the top LED strip (write the changes)
+ * @brief Show LED strip(s) by zone (write the changes)
  * 
  */
-void LEDCloudMatrix::showTop(void) {
-	raw_strips[LEDCloudMatrix::TOP]->show();
+void LEDCloudMatrix::showZone(zone_t zone_id) {
+	switch (zone_id) {
+		case zone_t::RIGHT:
+		case zone_t::FRONT:
+		case zone_t::LEFT:
+			raw_strips[strip_t::ROW_1_2]->show();
+			raw_strips[strip_t::ROW_3_4]->show();
+			break;
+		case zone_t::TOP:
+			raw_strips[strip_t::ROW_3_4]->show();
+			raw_strips[strip_t::TOP]->show();
+			break;
+	}
 }
 
 /**
- * @brief Extend the size of the full matrix map array
+ * @brief Extend the size of a zone
+ * 
+ * @param zone_id The zone's identifier
  */
-void LEDCloudMatrix::extend_map__full(void) {
-	uint16_t old_size = this->map__full_matrix.dim;
-	this->map__full_matrix.dim += 50;
+void LEDCloudMatrix::extend_zone(zone_t zone_id) {
+	uint16_t old_size = zones[zone_id].dim;
+	zones[zone_id].dim += 15;
 
 	// create new map
-	struct px_map** tmp_map = (struct px_map**) malloc(sizeof(struct px_map*) * this->map__full_matrix.dim);
-	for (uint8_t i = 0; i < this->map__full_matrix.dim; i++) {
-		tmp_map[i] = (struct px_map*) malloc(sizeof(struct px_map) * this->map__full_matrix.dim);
-		for (uint8_t j = 0; j < this->map__full_matrix.dim; j++) {
+	struct px_map** tmp_map = (struct px_map**) malloc(sizeof(struct px_map*) * zones[zone_id].dim);
+	for (uint8_t i = 0; i < zones[zone_id].dim; i++) {
+		tmp_map[i] = (struct px_map*) malloc(sizeof(struct px_map) * zones[zone_id].dim);
+		for (uint8_t j = 0; j < zones[zone_id].dim; j++) {
 			tmp_map[i][j].strip_id = -1;	// mark invalid
 		}
 	}
 
 	// copy in old data
-	for (uint8_t row = 0; row < this->map__full_matrix.r_y; row++) {
-		for (uint8_t col = 0; col < this->map__full_matrix.r_x; col++) {
-			tmp_map[row][col].strip_id = this->map__full_matrix.map[row][col].strip_id;
-			tmp_map[row][col].offset = this->map__full_matrix.map[row][col].offset;
+	for (uint8_t row = 0; row < zones[zone_id].r_h; row++) {
+		for (uint8_t col = 0; col < zones[zone_id].r_w; col++) {
+			tmp_map[row][col].strip_id = zones[zone_id].map[row][col].strip_id;
+			tmp_map[row][col].offset = zones[zone_id].map[row][col].offset;
 		}
 	}
 
 	// free old data
-	for (uint8_t i = 0; i < old_size; i++) { free(this->map__full_matrix.map[i]); }
-	free(this->map__full_matrix.map);
+	for (uint8_t i = 0; i < old_size; i++) { free(zones[zone_id].map[i]); }
+	free(zones[zone_id].map);
 
 	// set new map as map
-	this->map__full_matrix.map = tmp_map;
-}
-
-/**
- * @brief Extend the size of the top matrix map array
- */
-void LEDCloudMatrix::extend_map__top(void) {
-	uint16_t old_size = this->map__top_matrix.dim;
-	this->map__top_matrix.dim += 20;
-
-	// create new map
-	struct px_map** tmp_map = (struct px_map**) malloc(sizeof(struct px_map*) * this->map__top_matrix.dim);
-	for (uint8_t i = 0; i < this->map__top_matrix.dim; i++) {
-		tmp_map[i] = (struct px_map*) malloc(sizeof(struct px_map) * this->map__top_matrix.dim);
-		for (uint8_t j = 0; j < this->map__top_matrix.dim; j++) {
-			tmp_map[i][j].strip_id = -1;	// mark invalid
-		}
-	}
-
-	// copy in old data
-	for (uint8_t row = 0; row < this->map__top_matrix.r_y; row++) {
-		for (uint8_t col = 0; col < this->map__top_matrix.r_x; col++) {
-			tmp_map[row][col].strip_id = this->map__top_matrix.map[row][col].strip_id;
-			tmp_map[row][col].offset = this->map__top_matrix.map[row][col].offset;
-		}
-	}
-
-	// free old data
-	for (uint8_t i = 0; i < old_size; i++) { free(this->map__top_matrix.map[i]); }
-	free(this->map__top_matrix.map);
-
-	// set new map as map
-	this->map__top_matrix.map = tmp_map;
+	zones[zone_id].map = tmp_map;
 }
 
 /**
  * @brief Extend the size of the level map array
  */
-void LEDCloudMatrix::extend_map__level(void) {
-	this->map__level.dim += 5;
+void LEDCloudMatrix::extend_level(void) {
+	levels.dim += 5;
 
 	// create new map
-	struct px_level* tmp_map = (struct px_level*) malloc(sizeof(struct px_level) * this->map__level.dim);
-	for (uint8_t i = 0; i < this->map__level.dim; i++) {
-		this->map__level.map[i].strip_id = -1;	// mark invalid
+	struct px_level* tmp_map = (struct px_level*) malloc(sizeof(struct px_level) * levels.dim);
+	for (uint8_t i = 0; i < levels.dim; i++) {
+		levels.map[i].strip_id = -1;	// mark invalid
 	}
 
 	// copy in old data
-	for (uint8_t i = 0; i < this->map__level.r_count; i++) {
-		tmp_map[i].strip_id = this->map__level.map[i].strip_id;
-		tmp_map[i].offset = this->map__level.map[i].offset;
+	for (uint8_t i = 0; i < levels.r_dim; i++) {
+		tmp_map[i].strip_id = levels.map[i].strip_id;
+		tmp_map[i].offset = levels.map[i].offset;
+		tmp_map[i].length = levels.map[i].length;
 	}
 
 	// free old data
-	free(this->map__level.map);
+	free(levels.map);
 
 	// set new map as map
-	this->map__level.map = tmp_map;
+	levels.map = tmp_map;
 }
