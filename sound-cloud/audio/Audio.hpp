@@ -15,19 +15,22 @@
 
 class Audio {
 public:
-	AudioControlSGTL5000* board;
-	AudioInputI2S* input;
-	AudioAnalyzeFFT1024* fft_l;
-	AudioAnalyzeFFT1024* fft_r;
-	AudioConnection* fft_l_conn;
-	AudioConnection* fft_r_conn;
-	float** last_fft;
+	static AudioControlSGTL5000* board;
+	static AudioInputI2S* input;
+	static AudioAnalyzeFFT1024* fft_l;
+	static AudioAnalyzeFFT1024* fft_r;
+	static AudioConnection* fft_l_conn;
+	static AudioConnection* fft_r_conn;
+	static float** last_fft;
 
-	Audio(void);
+	static void init(void);
+
+	static float** getFFT(void);
+	static uint8_t fftToInt(float bin);
+private:
+	static uint8_t ready;
+	Audio(void) {};
 	~Audio(void) {};
-
-	float** getFFT(void);
-	uint8_t fftToInt(float bin);
 };
 
 // AudioAnalyzeRMS rms1;

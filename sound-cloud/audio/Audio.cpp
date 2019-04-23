@@ -1,51 +1,55 @@
 #include "Audio.hpp"
 
+uint8_t Audio::ready = 0;
+
 /**
- * @brief Initialize an audio object
+ * @brief Initialize the audio system
  * 
- * @param audio Pointer to audio object
  */
-Audio::Audio(void) {
-	// create objects for audio processing
-	this->board = new AudioControlSGTL5000();
-	this->input = new AudioInputI2S();
-	this->fft_l = new AudioAnalyzeFFT1024();
-	this->fft_r = new AudioAnalyzeFFT1024();
-	this->fft_l_conn = new AudioConnection(*this->input, 1, *this->fft_l, 0);
-	this->fft_r_conn = new AudioConnection(*this->input, 0, *this->fft_r, 0);
+void Audio::init(void) {
+	if (!ready) {
+		// create objects for audio processing
+		board = new AudioControlSGTL5000();
+		input = new AudioInputI2S();
+		fft_l = new AudioAnalyzeFFT1024();
+		fft_r = new AudioAnalyzeFFT1024();
+		fft_l_conn = new AudioConnection(*input, 1, *fft_l, 0);
+		fft_r_conn = new AudioConnection(*input, 0, *fft_r, 0);
 
-	// last FFT data set
-	this->last_fft = (float**) malloc(sizeof(float*) * 2);
-	this->last_fft[AUDIO_FFT_LEFT] = (float*) malloc(sizeof(float) * 512);
-	this->last_fft[AUDIO_FFT_RIGHT] = (float*) malloc(sizeof(float) * 512);
+		// last FFT data set
+		last_fft = (float**) malloc(sizeof(float*) * 2);
+		last_fft[AUDIO_FFT_LEFT] = (float*) malloc(sizeof(float) * 512);
+		last_fft[AUDIO_FFT_RIGHT] = (float*) malloc(sizeof(float) * 512);
 
-	// setup board
-	this->board->enable();
-	this->board->inputSelect(AUDIO_INPUT_LINEIN);
-	this->board->volume(0.5);
-	this->board->lineInLevel(15);
+		// setup board
+		board->enable();
+		board->inputSelect(AUDIO_INPUT_LINEIN);
+		board->volume(0.5);
+		board->lineInLevel(15);
+
+		ready = 1;
+	}
 }
 
 /**
  * @brief Get the FFT data if available
  * 
- * @param audio The audio struct
  * @return Pointer to FFT array of last collected data
  */
 float** Audio::getFFT(void) {
 	// check availability
-	if (!(this->fft_l->available() && this->fft_r->available())) {
-		return this->last_fft;
+	if (!(fft_l->available() && fft_r->available())) {
+		return last_fft;
 	}
 
 	// get data
 	for (uint16_t i = 0; i < 512; i++) {
-		this->last_fft[AUDIO_FFT_LEFT][i] = this->fft_l->read(i);
-		this->last_fft[AUDIO_FFT_RIGHT][i] = this->fft_r->read(i);
+		last_fft[AUDIO_FFT_LEFT][i] = fft_l->read(i);
+		last_fft[AUDIO_FFT_RIGHT][i] = fft_r->read(i);
 	}
 
 	// return the pointer for ease of use
-	return this->last_fft;
+	return last_fft;
 }
 
 /**
