@@ -161,7 +161,7 @@ void LEDCloudControl::mapSegmentToZone(led_segment_t* segment, zone_t zone_id, u
 			if (zones[zone_id].r_w < col) { zones[zone_id].r_w = col; }
 			if (zones[zone_id].r_h < row) { zones[zone_id].r_h = row; }
 
-			for (uint16_t c = 0; c < segment->length && (col - c); c++) {
+			for (uint16_t c = 0; c < segment->length && (col - c) >= 0; c++) {
 				zones[zone_id].map[row][col - c].strip_id = segment->strip_id;
 				zones[zone_id].map[row][col - c].offset = segment->offset + c;
 			}
@@ -183,6 +183,7 @@ void LEDCloudControl::mapSegmentToLevel(led_segment_t* segment, uint8_t level) {
 	// set the map
 	levels.map[level].strip_id = segment->strip_id;
 	levels.map[level].offset = segment->offset;
+	levels.map[level].length = segment->length;
 }
 
 /**
@@ -235,7 +236,7 @@ void LEDCloudControl::setPixelColorByLevel(uint8_t level, uint16_t n, uint8_t r,
  * @param c 32-bit color
  */
 void LEDCloudControl::setPixelColorByLevel(uint8_t level, uint16_t n, uint32_t c) {
-	struct px_level* m = &(this->levels.map[level]);
+	struct px_level* m = &(levels.map[level]);
 	this->raw_strips[m->strip_id]->setPixelColor(m->offset + n, c);
 }
 

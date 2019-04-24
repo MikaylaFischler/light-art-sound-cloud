@@ -32,11 +32,8 @@ void setup() {
 
 	// init LEDs
 	row_1_2_led_strip.begin();
-	row_1_2_led_strip.show();
 	row_3_4_led_strip.begin();
-	row_3_4_led_strip.show();
 	top_led_strip.begin();
-	top_led_strip.show();
 
 	// create our cloud matrix
 	led_ctrl = new LEDCloudControl(&row_1_2_led_strip, &row_3_4_led_strip, &top_led_strip);
@@ -92,20 +89,64 @@ void setup() {
 	led_ctrl->mapSegmentToZone(z_3__2, zone_t::TOP, 2, 1, seg_o_t::ROW_POS);
 	led_ctrl->mapSegmentToZone(z_3__3, zone_t::TOP, 3, 12, seg_o_t::ROW_NEG);
 	led_ctrl->mapSegmentToZone(z_3__4, zone_t::TOP, 4, 1, seg_o_t::ROW_POS);
-	led_ctrl->mapSegmentToZone(z_3__5, zone_t::TOP, 0, 0, seg_o_t::COLUMN_POS);
+	led_ctrl->mapSegmentToZone(z_3__5, zone_t::TOP, 2, 0, seg_o_t::COLUMN_NEG);
 	led_ctrl->mapSegmentToZone(z_3__6, zone_t::TOP, 0, 13, seg_o_t::COLUMN_POS);
 
 	// setup animations system
 	Animations::linkCloudControl(led_ctrl);
+
+	// ensure all are shown as off
+	led_ctrl->show();
 }
 
 void loop() {
+	// Serial.println(led_ctrl->levelLength(0));
+
+	// LEVEL DEBUG START
 	for (int i = 0; i < led_ctrl->levelLength(0); i++) {
-		led_ctrl->setPixelColorByLevel(0, i, COLOR_DIM_OFF_WHITE);
-		Serial.println(i);
+		if (i > 0) { led_ctrl->setPixelColorByLevel(0, i - 1, COLOR_OFF); }
+		led_ctrl->setPixelColorByLevel(0, i, COLOR_WHITE);
+		led_ctrl->showLevel(0);
+		delay(50);
 	}
+	led_ctrl->setPixelColorByLevel(0, led_ctrl->levelLength(0) - 1, COLOR_OFF);
 	led_ctrl->showLevel(0);
-	delay(1000);
+
+	for (int i = 0; i < led_ctrl->levelLength(1); i++) {
+		if (i > 0) { led_ctrl->setPixelColorByLevel(1, i - 1, COLOR_OFF); }
+		led_ctrl->setPixelColorByLevel(1, i, COLOR_WHITE);
+		led_ctrl->showLevel(1);
+		delay(50);
+	}
+	led_ctrl->setPixelColorByLevel(1, led_ctrl->levelLength(1) - 1, COLOR_OFF);
+	led_ctrl->showLevel(1);
+
+	for (int i = 0; i < led_ctrl->levelLength(2); i++) {
+		if (i > 0) { led_ctrl->setPixelColorByLevel(2, i - 1, COLOR_OFF); }
+		led_ctrl->setPixelColorByLevel(2, i, COLOR_WHITE);
+		led_ctrl->showLevel(2);
+		delay(50);
+	}
+	led_ctrl->setPixelColorByLevel(2, led_ctrl->levelLength(2) - 1, COLOR_OFF);
+	led_ctrl->showLevel(2);
+
+	for (int i = 0; i < led_ctrl->levelLength(3); i++) {
+		if (i > 0) { led_ctrl->setPixelColorByLevel(3, i - 1, COLOR_OFF); }
+		led_ctrl->setPixelColorByLevel(3, i, COLOR_WHITE);
+		led_ctrl->showLevel(3);
+		delay(50);
+	}
+	led_ctrl->setPixelColorByLevel(3, led_ctrl->levelLength(3) - 1, COLOR_OFF);
+	led_ctrl->showLevel(3);
+	// LEVEL DEBUG END
+
+	led_ctrl->setPixelColorByZone(zone_t::TOP, 3, 0, COLOR_RED);
+	led_ctrl->setPixelColorByZone(zone_t::TOP, 2, 0, COLOR_RED);
+	led_ctrl->setPixelColorByZone(zone_t::TOP, 1, 0, COLOR_RED);
+	led_ctrl->setPixelColorByZone(zone_t::TOP, 0, 0, COLOR_RED);
+	led_ctrl->showZone(zone_t::TOP);
+
+	delay(5000);
 	// Animations::Standby::solidSoftWhite();
 	// Serial.println("HEARTBEAT");
 }

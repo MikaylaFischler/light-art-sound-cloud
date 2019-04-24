@@ -1,5 +1,13 @@
 #include "Audio.hpp"
 
+AudioControlSGTL5000* Audio::board = NULL;
+AudioInputI2S* Audio::input = NULL;
+AudioAnalyzeFFT1024* Audio::fft_l = NULL;
+AudioAnalyzeFFT1024* Audio::fft_r = NULL;
+AudioConnection* Audio::fft_l_conn = NULL;
+AudioConnection* Audio::fft_r_conn = NULL;
+float** Audio::last_fft = NULL;
+
 uint8_t Audio::ready = 0;
 
 /**
