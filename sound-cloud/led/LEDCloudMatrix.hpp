@@ -41,12 +41,12 @@ namespace LEDCloudMatrix {
 
 		void setAll(uint8_t r, uint8_t g, uint8_t b);
 		void setAll(uint32_t c);
-		void setZone(uint8_t r, uint8_t g, uint8_t b);
-		void setZone(uint32_t c);
-		void setZoneRow(uint8_t r, uint8_t g, uint8_t b);
-		void setZoneRow(uint32_t c);
-		void setZoneCol(uint8_t r, uint8_t g, uint8_t b);
-		void setZoneCol(uint32_t c);
+		void setZone(zone_t zone_id, uint8_t r, uint8_t g, uint8_t b);
+		void setZone(zone_t zone_id, uint32_t c);
+		void setZoneRow(zone_t zone_id, uint8_t row, uint8_t r, uint8_t g, uint8_t b);
+		void setZoneRow(zone_t zone_id, uint8_t row, uint32_t c);
+		void setZoneCol(zone_t zone_id, uint8_t col, uint8_t r, uint8_t g, uint8_t b);
+		void setZoneCol(zone_t zone_id, uint8_t col, uint32_t c);
 
 		void show(void);
 		void showLevel(uint8_t level);
@@ -58,12 +58,12 @@ namespace LEDCloudMatrix {
 		void extend_zone(zone_t zone_id);
 
 		struct px_map {
-			uint8_t strip_id;
+			int8_t strip_id;
 			uint16_t offset;
 		};
 
 		struct px_level {
-			uint8_t strip_id;
+			int8_t strip_id;
 			uint16_t offset;
 			uint16_t length;
 		};

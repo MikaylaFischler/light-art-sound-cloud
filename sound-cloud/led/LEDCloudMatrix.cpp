@@ -11,14 +11,14 @@ using namespace LEDCloudMatrix;
  */
 LEDCloudControl::LEDCloudControl(Adafruit_NeoPixel* row_1_2_strip, Adafruit_NeoPixel* row_3_4_strip, Adafruit_NeoPixel* top_strip) {
 	// store strips
-	this->raw_strips[strip_t::S_R12] = row_1_2_strip;
-	this->raw_strips[strip_t::S_R34] = row_3_4_strip;
-	this->raw_strips[strip_t::S_TOP] = top_strip;
+	raw_strips[strip_t::S_R12] = row_1_2_strip;
+	raw_strips[strip_t::S_R34] = row_3_4_strip;
+	raw_strips[strip_t::S_TOP] = top_strip;
 	
 	// default brightness
 	for (uint8_t i = 0; i < 3; i++) {
-		this->raw_strips[i]->setBrightness(150);
-		this->raw_strips[i]->show();
+		raw_strips[i]->setBrightness(150);
+		raw_strips[i]->show();
 	}
 
 	// allocate zones
@@ -125,7 +125,7 @@ void LEDCloudControl::mapSegmentToZone(led_segment_t* segment, zone_t zone_id, u
 		case COLUMN_POS:
 			// make sure we can fit this and update the real lengths if necessary
 			while (row_max >= zones[zone_id].dim || col >= zones[zone_id].dim) { extend_zone(zone_id); }
-			if (zones[zone_id].r_w < col) { zones[zone_id].r_w = col; }
+			if (zones[zone_id].r_w <= col) { zones[zone_id].r_w = col + 1; }
 			if (zones[zone_id].r_h < row_max) { zones[zone_id].r_h = row_max; }
 
 			for (uint16_t r = 0; r < segment->length; r++) {
@@ -136,8 +136,8 @@ void LEDCloudControl::mapSegmentToZone(led_segment_t* segment, zone_t zone_id, u
 		case COLUMN_NEG:
 			// make sure we can fit this and update the real lengths if necessary
 			while (row >= zones[zone_id].dim || col >= zones[zone_id].dim) { extend_zone(zone_id); }
-			if (zones[zone_id].r_w < col) { zones[zone_id].r_w = col; }
-			if (zones[zone_id].r_h < row) { zones[zone_id].r_h = row; }
+			if (zones[zone_id].r_w <= col) { zones[zone_id].r_w = col + 1; }
+			if (zones[zone_id].r_h <= row) { zones[zone_id].r_h = row + 1; }
 
 			for (uint16_t r = 0; r < segment->length && (row - r) >= 0; r++) {
 				zones[zone_id].map[row - r][col].strip_id = segment->strip_id;
@@ -148,7 +148,7 @@ void LEDCloudControl::mapSegmentToZone(led_segment_t* segment, zone_t zone_id, u
 			// make sure we can fit this and update the real lengths if necessary
 			while (row >= zones[zone_id].dim || col_max >= zones[zone_id].dim) { extend_zone(zone_id); }
 			if (zones[zone_id].r_w < col_max) { zones[zone_id].r_w = col_max; }
-			if (zones[zone_id].r_h < row) { zones[zone_id].r_h = row; }
+			if (zones[zone_id].r_h <= row) { zones[zone_id].r_h = row + 1; }
 
 			for (uint16_t c = 0; c < segment->length; c++) {
 				zones[zone_id].map[row][col + c].strip_id = segment->strip_id;
@@ -158,8 +158,8 @@ void LEDCloudControl::mapSegmentToZone(led_segment_t* segment, zone_t zone_id, u
 		case ROW_NEG:
 			// make sure we can fit this and update the real lengths if necessary
 			while (row >= zones[zone_id].dim || col >= zones[zone_id].dim) { extend_zone(zone_id); }
-			if (zones[zone_id].r_w < col) { zones[zone_id].r_w = col; }
-			if (zones[zone_id].r_h < row) { zones[zone_id].r_h = row; }
+			if (zones[zone_id].r_w <= col) { zones[zone_id].r_w = col + 1; }
+			if (zones[zone_id].r_h <= row) { zones[zone_id].r_h = row + 1; }
 
 			for (uint16_t c = 0; c < segment->length && (col - c) >= 0; c++) {
 				zones[zone_id].map[row][col - c].strip_id = segment->strip_id;
@@ -197,8 +197,9 @@ void LEDCloudControl::mapSegmentToLevel(led_segment_t* segment, uint8_t level) {
  * @param b Blue value
  */
 void LEDCloudControl::setPixelColorByZone(zone_t zone_id, uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
+	if (zones[zone_id].map[x][y].strip_id == -1) { return; }
 	struct px_map* m = &(zones[zone_id].map[x][y]);
-	this->raw_strips[m->strip_id]->setPixelColor(m->offset, r, g, b);
+	raw_strips[m->strip_id]->setPixelColor(m->offset, r, g, b);
 }
 
 /**
@@ -210,8 +211,9 @@ void LEDCloudControl::setPixelColorByZone(zone_t zone_id, uint8_t x, uint8_t y, 
  * @param c 32-bit color
  */
 void LEDCloudControl::setPixelColorByZone(zone_t zone_id, uint8_t x, uint8_t y, uint32_t c) {
+	if (zones[zone_id].map[x][y].strip_id == -1) { return; }
 	struct px_map* m = &(zones[zone_id].map[x][y]);
-	this->raw_strips[m->strip_id]->setPixelColor(m->offset, c);
+	raw_strips[m->strip_id]->setPixelColor(m->offset, c);
 }
 
 /**
@@ -225,7 +227,7 @@ void LEDCloudControl::setPixelColorByZone(zone_t zone_id, uint8_t x, uint8_t y, 
  */
 void LEDCloudControl::setPixelColorByLevel(uint8_t level, uint16_t n, uint8_t r, uint8_t g, uint8_t b) {
 	struct px_level* m = &(levels.map[level]);
-	this->raw_strips[m->strip_id]->setPixelColor(m->offset + n, r, g, b);
+	raw_strips[m->strip_id]->setPixelColor(m->offset + n, r, g, b);
 }
 
 /**
@@ -237,7 +239,70 @@ void LEDCloudControl::setPixelColorByLevel(uint8_t level, uint16_t n, uint8_t r,
  */
 void LEDCloudControl::setPixelColorByLevel(uint8_t level, uint16_t n, uint32_t c) {
 	struct px_level* m = &(levels.map[level]);
-	this->raw_strips[m->strip_id]->setPixelColor(m->offset + n, c);
+	raw_strips[m->strip_id]->setPixelColor(m->offset + n, c);
+}
+
+void LEDCloudControl::setAll(uint8_t r, uint8_t g, uint8_t b) {
+
+}
+
+void LEDCloudControl::setAll(uint32_t c) {
+
+}
+
+void LEDCloudControl::setZone(zone_t zone_id, uint8_t r, uint8_t g, uint8_t b) {
+	for (uint16_t row = 0; row < zoneHeight(zone_id); row++) {
+		for (uint16_t col = 0; col < zoneWidth(zone_id); col++) {
+			struct px_map* p = &(zones[zone_id].map[row][col]);
+			if (p->strip_id == -1) { continue; }
+			raw_strips[p->strip_id]->setPixelColor(p->offset, r, g, b);
+		}
+	}
+}
+
+void LEDCloudControl::setZone(zone_t zone_id, uint32_t c) {
+	for (uint16_t row = 0; row < zoneHeight(zone_id); row++) {
+		for (uint16_t col = 0; col < zoneWidth(zone_id); col++) {
+			struct px_map* p = &(zones[zone_id].map[row][col]);
+			if (p->strip_id == -1) { continue; }
+			raw_strips[p->strip_id]->setPixelColor(p->offset, c);
+		}
+	}
+}
+
+void LEDCloudControl::setZoneRow(zone_t zone_id, uint8_t row, uint8_t r, uint8_t g, uint8_t b) {
+	for (uint16_t col = 0; col < zoneWidth(zone_id); col++) {
+		struct px_map* p = &(zones[zone_id].map[row][col]);
+		if (p->strip_id == -1) { continue; }
+		raw_strips[p->strip_id]->setPixelColor(p->offset, r, g, b);
+	}
+}
+
+void LEDCloudControl::setZoneRow(zone_t zone_id, uint8_t row, uint32_t c) {
+	for (uint16_t col = 0; col < zoneWidth(zone_id); col++) {
+		struct px_map* p = &(zones[zone_id].map[row][col]);
+		Serial.print(p->strip_id);
+		Serial.print(" ");
+		Serial.println(p->offset);
+		if (p->strip_id == -1) { continue; }
+		raw_strips[p->strip_id]->setPixelColor(p->offset, c);
+	}
+}
+
+void LEDCloudControl::setZoneCol(zone_t zone_id, uint8_t col, uint8_t r, uint8_t g, uint8_t b) {
+	for (uint16_t row = 0; row < zoneWidth(zone_id); row++) {
+		struct px_map* p = &(zones[zone_id].map[row][col]);
+		if (p->strip_id == -1) { continue; }
+		raw_strips[p->strip_id]->setPixelColor(p->offset, r, g, b);
+	}
+}
+
+void LEDCloudControl::setZoneCol(zone_t zone_id, uint8_t col, uint32_t c) {
+	for (uint16_t row = 0; row < zoneWidth(zone_id); row++) {
+		struct px_map* p = &(zones[zone_id].map[row][col]);
+		if (p->strip_id == -1) { continue; }
+		raw_strips[p->strip_id]->setPixelColor(p->offset, c);
+	}
 }
 
 /**
