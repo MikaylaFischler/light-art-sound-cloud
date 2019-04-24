@@ -13,6 +13,7 @@ class Animations {
 
 		// basic functions
 		static void allOff(void);
+		static void diagnostics(void);
 
 		class Standby {
 			public:
