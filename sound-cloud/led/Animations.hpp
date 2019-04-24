@@ -10,7 +10,6 @@ using namespace LEDCloudMatrix;
 class Animations {
 	public:
 		static void linkCloudControl(LEDCloudControl* lcm);
-		static void linkAudio(Audio* audio);
 
 		// basic functions
 		static void allOff(void);
@@ -41,7 +40,6 @@ class Animations {
 		virtual ~Animations() {};
 	
 		static LEDCloudControl* lcm;
-		static Audio* audio;
 
 		friend class Animations::Standby;
 		friend class Animations::Simple;

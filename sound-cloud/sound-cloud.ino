@@ -22,14 +22,13 @@ Adafruit_NeoPixel row_1_2_led_strip(ROW_1_2_LED_LENGTH, ROW_1_2_LED_STRIP_PIN, N
 Adafruit_NeoPixel row_3_4_led_strip(ROW_3_4_LED_LENGTH, ROW_3_4_LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel top_led_strip(TOP_LED_LENGTH, TOP_LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 LEDCloudControl* led_ctrl;
-Audio* audio;
 
 void setup() {
 	// initilize mode button interrupt
 	io_init_mode_control();
 
 	// initilize audio system
-	audio = new Audio();
+	Audio::init();
 
 	// init LEDs
 	row_1_2_led_strip.begin();
@@ -97,7 +96,6 @@ void setup() {
 	led_ctrl->mapSegmentToZone(z_3__6, zone_t::TOP, 0, 13, seg_o_t::COLUMN_POS);
 
 	// setup animations system
-	Animations::linkAudio(audio);
 	Animations::linkCloudControl(led_ctrl);
 }
 

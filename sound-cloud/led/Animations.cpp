@@ -1,7 +1,6 @@
 #include "Animations.hpp"
 
 LEDCloudControl* Animations::lcm = NULL;
-Audio* Animations::audio = NULL;
 
 /**
  * @brief Link a LEDCloudControl object for LED control
@@ -9,13 +8,6 @@ Audio* Animations::audio = NULL;
  * @param lcm Pointer to a LEDCloudControl object
  */
 void Animations::linkCloudControl(LEDCloudControl* lcm) { Animations::lcm = lcm; }
-
-/**
- * @brief Link an Audio object for audio input
- * 
- * @param audio Pointer to an Audio object
- */
-void Animations::linkAudio(Audio* audio) { Animations::audio = audio; }
 
 /**
  * @brief Turn off all LEDs
