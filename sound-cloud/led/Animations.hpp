@@ -3,13 +3,13 @@
 
 #include <inttypes.h>
 
-#include "ledmath.c"
 #include "color.h"
 #include "../audio/Audio.hpp"
 #include "LEDCloudMatrix.hpp"
 #include "LEDCloudControl.hpp"
 
 using namespace LEDCloudMatrix;
+using namespace LEDCloudMatrix::LEDMath;
 
 class Animations {
 	public:

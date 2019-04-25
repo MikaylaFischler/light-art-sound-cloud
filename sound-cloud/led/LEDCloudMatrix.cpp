@@ -1,12 +1,67 @@
 #include "LEDCloudMatrix.hpp"
 
 /**
+ * @brief LEDMath functions can be found here on Desmos
+ *  <a target="_blank" href="https://www.desmos.com/calculator/evodsxrtjj">Calculated Brightness Curves</a>
+ */
+
+/**
+ * @brief Curve brightness input quadratically
+ * 
+ * @param x Input
+ * @return uint8_t Transformed output
+ */
+uint8_t LEDCloudMatrix::LEDMath::quadraticBrightness(uint8_t x) {
+	return (uint8_t) round(0.003921568627 * (double) pow((uint64_t) x, 2));
+}
+
+/**
+ * @brief Curve brightness input cubically
+ * 
+ * @param x Input
+ * @return uint8_t Transformed output
+ */
+uint8_t LEDCloudMatrix::LEDMath::cubicBrightness(uint8_t x) {
+	return (uint8_t) round(0.0000153787005 * (double) pow((uint64_t) x, 3));
+}
+
+/**
+ * @brief Curve brightness input quartically
+ * 
+ * @param x Input
+ * @return uint8_t Transformed output
+ */
+uint8_t LEDCloudMatrix::LEDMath::quarticBrightness(uint8_t x) {
+	return (uint8_t) round(0.0000000603086294 * (double) pow((uint64_t) x, 4));
+}
+
+/**
+ * @brief Curve brightness input by inverse 4.10612163x^{0.745}
+ * 
+ * @param x Input
+ * @return uint8_t Transformed output
+ */
+uint8_t LEDCloudMatrix::LEDMath::inverseFractional_0745_Brightness(uint8_t x) {
+	return (uint8_t) round(4.1083529414 * (double) pow((uint64_t) x, 0.745));
+}
+
+/**
+ * @brief Curve brightness input by inverse 12.444452145x^{0.545}
+ * 
+ * @param x Input
+ * @return uint8_t Transformed output
+ */
+uint8_t LEDCloudMatrix::LEDMath::inverseFractional_0545_Brightness(uint8_t x) {
+	return (uint8_t) round(12.444452148 * (double) pow((uint64_t) x, 0.545));
+}
+
+/**
  * @brief Produces Red component of 32-bit RGB
  * 
  * @param color 32-bit RGB color
  * @return uint8_t Red component (8-bit) of a 32-bit color
  */
-uint8_t LEDCloudMatrix::redFromColor(uint32_t color) {
+uint8_t LEDCloudMatrix::LEDColor::redFromColor(uint32_t color) {
     return (color >> 16) & 0xFF;
 }
 
@@ -16,7 +71,7 @@ uint8_t LEDCloudMatrix::redFromColor(uint32_t color) {
  * @param color 32-bit RGB color
  * @return uint8_t Green component (8-bit) of a 32-bit color
  */
-uint8_t LEDCloudMatrix::greenFromColor(uint32_t color) {
+uint8_t LEDCloudMatrix::LEDColor::greenFromColor(uint32_t color) {
     return (color >> 8) & 0xFF;
 }
 
@@ -26,7 +81,7 @@ uint8_t LEDCloudMatrix::greenFromColor(uint32_t color) {
  * @param color 32-bit RGB color
  * @return uint8_t Blue component (8-bit) of a 32-bit color
  */
-uint8_t LEDCloudMatrix::blueFromColor(uint32_t color) {
+uint8_t LEDCloudMatrix::LEDColor::blueFromColor(uint32_t color) {
     return color & 0xFF;
 }
 
@@ -38,7 +93,7 @@ uint8_t LEDCloudMatrix::blueFromColor(uint32_t color) {
  * @param b Blue component
  * @return uint8_t 32-bit RGB color
  */
-uint32_t LEDCloudMatrix::color(uint8_t r, uint8_t g, uint8_t b) {
+uint32_t LEDCloudMatrix::LEDColor::color(uint8_t r, uint8_t g, uint8_t b) {
 	return ((uint32_t) r << 16) | ((uint32_t) g <<  8) | b;
 }
 
@@ -49,18 +104,18 @@ uint32_t LEDCloudMatrix::color(uint8_t r, uint8_t g, uint8_t b) {
  * @param wheel_pos A number from 0 to 255 giving a position in the color wheel
  * @return uint32_t 
  */
-uint32_t LEDCloudMatrix::colorWheel(uint8_t wheel_pos) {
+uint32_t LEDCloudMatrix::LEDColor::colorWheel(uint8_t wheel_pos) {
 	wheel_pos = 255 - wheel_pos;
 
 	if (wheel_pos < 85) {
-		return LEDCloudMatrix::color(255 - wheel_pos * 3, 0, wheel_pos * 3);
+		return LEDCloudMatrix::LEDColor::color(255 - wheel_pos * 3, 0, wheel_pos * 3);
 	}
 
 	if (wheel_pos < 170) {
 		wheel_pos -= 85;
-		return LEDCloudMatrix::color(0, wheel_pos * 3, 255 - wheel_pos * 3);
+		return LEDCloudMatrix::LEDColor::color(0, wheel_pos * 3, 255 - wheel_pos * 3);
 	}
 
 	wheel_pos -= 170;
-	return LEDCloudMatrix::color(wheel_pos * 3, 255 - wheel_pos * 3, 0);
+	return LEDCloudMatrix::LEDColor::color(wheel_pos * 3, 255 - wheel_pos * 3, 0);
 }

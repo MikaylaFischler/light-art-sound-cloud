@@ -20,12 +20,23 @@ namespace LEDCloudMatrix {
 	typedef enum seg_o seg_o_t;
 	typedef enum zone zone_t;
 
-	static uint8_t redFromColor(uint32_t color);
-	static uint8_t greenFromColor(uint32_t color);
-	static uint8_t blueFromColor(uint32_t color);
+	namespace LEDMath{
+		uint8_t quadraticBrightness(uint8_t x);
+		uint8_t cubicBrightness(uint8_t x);
+		uint8_t quarticBrightness(uint8_t x);
 
-	static uint32_t color(uint8_t r, uint8_t g, uint8_t b) ;
-	static uint32_t colorWheel(uint8_t wheel_pos);
+		uint8_t inverseFractional_0745_Brightness(uint8_t x);
+		uint8_t inverseFractional_0545_Brightness(uint8_t x);
+	};
+
+	namespace LEDColor {
+		uint8_t redFromColor(uint32_t color);
+		uint8_t greenFromColor(uint32_t color);
+		uint8_t blueFromColor(uint32_t color);
+
+		uint32_t color(uint8_t r, uint8_t g, uint8_t b) ;
+		uint32_t colorWheel(uint8_t wheel_pos);
+	};
 };
 
 #endif
