@@ -15,6 +15,7 @@
 #include "led/LEDCloudMatrix.cpp"
 #include "led/Animations.cpp"
 #include "led/Animations.Standby.cpp"
+#include "led/Animations.Simple.cpp"
 
 using namespace LEDCloudMatrix;
 
@@ -102,10 +103,8 @@ void setup() {
 }
 
 void loop() {
-	// Serial.println(led_ctrl->levelLength(0));
-
-	Animations::diagnostics();
+	// Animations::diagnostics();
+	Animations::Simple::bassRangePulse();
 
 	// Animations::Standby::solidSoftWhite();
-	// Serial.println("HEARTBEAT");
 }

@@ -1,6 +1,9 @@
 #ifndef CLOUD_ANIMATIONS_HPP_
 #define CLOUD_ANIMATIONS_HPP_
 
+#include <inttypes.h>
+
+#include "ledmath.c"
 #include "color.h"
 #include "../audio/Audio.hpp"
 #include "LEDCloudMatrix.hpp"
@@ -26,7 +29,8 @@ class Animations {
 
 		class Simple {
 			public:
-				// static void bassRangePulse(void);
+				static void baseSidePulse(void);
+				static void bassRangePulse(void);
 				// static void bassTreblePulse(void);
 				// static void noteFlash(void);
 				// static void linearVisualizer3D(void);

@@ -17,7 +17,7 @@ LEDCloudControl::LEDCloudControl(Adafruit_NeoPixel* row_1_2_strip, Adafruit_NeoP
 	
 	// default brightness
 	for (uint8_t i = 0; i < 3; i++) {
-		raw_strips[i]->setBrightness(150);
+		raw_strips[i]->setBrightness(200);
 		raw_strips[i]->show();
 	}
 
