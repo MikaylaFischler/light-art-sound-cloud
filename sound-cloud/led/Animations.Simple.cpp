@@ -105,7 +105,7 @@ void Animations::Simple::bassTreblePulse(void) {
 	}
 
 	for (int i = 9; i <= 12; i++) {
-		lcm->setZoneCol(zone_t::FRONT, i, 0, out_r_lm, 0);
+		lcm->setZoneCol(zone_t::FRONT, i, 0, out_l_lm, 0);
 	}
 
 	for (int i = 7; i <= 8; i++) {
@@ -121,5 +121,5 @@ void Animations::Simple::bassTreblePulse(void) {
 	lcm->show();
 
 	unsigned long t_2 = micros();
-	// Serial.println(out_r_hm);
+	Serial.println(t_2 - t_1);
 }
