@@ -1,6 +1,6 @@
 #include "Animations.hpp"
 
-void Animations::Simple::baseSidePulse(void) {
+void Animations::Simple::bassSidePulse(void) {
 	unsigned long t_1 = micros();
 	Audio::getFFT();
 	

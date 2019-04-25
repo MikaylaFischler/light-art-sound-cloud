@@ -29,7 +29,7 @@ class Animations {
 
 		class Simple {
 			public:
-				static void baseSidePulse(void);
+				static void bassSidePulse(void);
 				static void bassRangePulse(void);
 				static void bassTreblePulse(void);
 				// static void fullRangeDisplay(void);
