@@ -11,7 +11,8 @@
 #include "freq_map.h"
 
 #define AUDIO_FFT_LEFT 0
-#define AUDIO_FFT_RIGHT 0
+#define AUDIO_FFT_RIGHT 1
+#define AUDIO_FFT_COMBINED 2
 
 class Audio {
 public:
@@ -26,7 +27,16 @@ public:
 	static void init(void);
 
 	static float** getFFT(void);
-	static uint8_t fftToInt(float bin);
+	static float** getFFTWhenReady(void);
+	static float** getFFTWhenReadyBlocking(void);
+
+	static float averageFFTRange(uint8_t side, uint16_t bin_start, uint16_t bin_end);
+	static float averageFFTRangeUnbalanced(uint8_t side, uint16_t bin_start, uint16_t bin_end, float division_factor);
+	
+	static float* averageDualFFTRange(uint16_t bin_start, uint16_t bin_end);
+	static float* averageDualFFTRangeUnbalanced(uint16_t bin_start, uint16_t bin_end, float division_factor);
+
+	static uint8_t fftToInt(float bin, float scale_factor, uint8_t (*brightness_transform)(uint64_t));
 private:
 	static uint8_t ready;
 	Audio(void) {};
