@@ -2,21 +2,12 @@
 
 void Animations::Simple::bassSidePulse(void) {
 	unsigned long t_1 = micros();
-	Audio::getFFT();
-	
-	float avg_l = 0;
-	for (uint8_t i = 0; i <= FREQ_258HZ; i++) {
-		avg_l += Audio::last_fft[AUDIO_FFT_LEFT][i];
-	}
-	avg_l /= FREQ_258HZ;
-	uint8_t out_l = (uint8_t) quadraticBrightness((uint64_t) (avg_l * 6 * 255.0));
-	
-	float avg_r = 0;
-	for (uint8_t i = 0; i <= FREQ_258HZ; i++) {
-		avg_r += Audio::last_fft[AUDIO_FFT_RIGHT][i];
-	}
-	avg_r /= FREQ_258HZ;
-	uint8_t out_r = (uint8_t) quadraticBrightness((uint64_t) (avg_r * 6 * 255.0));
+	Audio::getFFTWhenReadyBlocking();
+
+	float* avgs = Audio::averageDualFFTRange(FREQ_0HZ, FREQ_258HZ);
+
+	uint8_t out_l = Audio::fftToInt(avgs[0], 6, quadraticBrightness);
+	uint8_t out_r = Audio::fftToInt(avgs[1], 6, quadraticBrightness);
 
 	lcm->setZone(zone_t::LEFT, out_l, 0, 0);
 	lcm->setZone(zone_t::RIGHT, out_r, 0, 0);
@@ -28,50 +19,20 @@ void Animations::Simple::bassSidePulse(void) {
 
 void Animations::Simple::bassRangePulse(void) {
 	unsigned long t_1 = micros();
-	Audio::getFFT();
-	
-	float avg_l_sb = 0;
-	float avg_r_sb = 0;
-	
-	float avg_l_b = 0;
-	float avg_r_b = 0;
-	
-	float avg_l_lm = 0;
-	float avg_r_lm = 0;
-	
-	for (uint8_t i = 0; i <= FREQ_86HZ; i++) {
-		avg_l_sb += Audio::last_fft[AUDIO_FFT_LEFT][i];
-		avg_r_sb += Audio::last_fft[AUDIO_FFT_RIGHT][i];
-	}
+	Audio::getFFTWhenReadyBlocking();
 
-	avg_l_sb /= FREQ_86HZ;
-	avg_r_sb /= FREQ_86HZ;
-	
-	for (uint8_t i = FREQ_129HZ; i <= FREQ_258HZ; i++) {
-		avg_l_b += Audio::last_fft[AUDIO_FFT_LEFT][i];
-		avg_r_b += Audio::last_fft[AUDIO_FFT_RIGHT][i];
-	}
+	float* avgs_sb = Audio::averageDualFFTRange(FREQ_0HZ, FREQ_86HZ);
+	float* avgs_b = Audio::averageDualFFTRange(FREQ_129HZ, FREQ_258HZ);
+	float* avgs_lm = Audio::averageDualFFTRange(FREQ_258HZ, FREQ_516HZ);
 
-	avg_l_b /= FREQ_258HZ - FREQ_129HZ + 1;
-	avg_r_b /= FREQ_258HZ - FREQ_129HZ + 1;
-	
-	for (uint8_t i = FREQ_258HZ; i <= FREQ_516HZ; i++) {
-		avg_l_lm += Audio::last_fft[AUDIO_FFT_LEFT][i];
-		avg_r_lm += Audio::last_fft[AUDIO_FFT_RIGHT][i];
-	}
+	uint8_t out_l_sb = Audio::fftToInt(avgs_sb[0], 6, quadraticBrightness);
+	uint8_t out_r_sb = Audio::fftToInt(avgs_sb[1], 6, quadraticBrightness);
 
-	avg_l_lm /= FREQ_516HZ - FREQ_258HZ + 1;
-	avg_r_lm /= FREQ_516HZ - FREQ_258HZ + 1;
+	uint8_t out_l_b = Audio::fftToInt(avgs_b[0], 6, quadraticBrightness);
+	uint8_t out_r_b = Audio::fftToInt(avgs_b[1], 6, quadraticBrightness);
 
-	uint8_t out_l_sb = (uint8_t) cubicBrightness((uint64_t) (avg_l_sb * 6 * 255.0));
-	uint8_t out_r_sb = (uint8_t) cubicBrightness((uint64_t) (avg_r_sb * 6 * 255.0));
-
-	uint8_t out_l_b = (uint8_t) cubicBrightness((uint64_t) (avg_l_b * 6 * 255.0));
-	uint8_t out_r_b = (uint8_t) cubicBrightness((uint64_t) (avg_r_b * 6 * 255.0));
-
-	uint8_t out_l_lm = (uint8_t) cubicBrightness((uint64_t) (avg_l_lm * 6 * 255.0));
-	uint8_t out_r_lm = (uint8_t) cubicBrightness((uint64_t) (avg_r_lm * 6 * 255.0));
-
+	uint8_t out_l_lm = Audio::fftToInt(avgs_lm[0], 6, quadraticBrightness);
+	uint8_t out_r_lm = Audio::fftToInt(avgs_lm[1], 6, quadraticBrightness);
 
 	lcm->setZone(zone_t::LEFT, out_l_sb, out_l_sb, 0);
 	lcm->setZone(zone_t::RIGHT, out_r_sb, out_r_sb, 0);
@@ -98,77 +59,30 @@ void Animations::Simple::bassRangePulse(void) {
 void Animations::Simple::bassTreblePulse(void) {
 	unsigned long t_1 = micros();
 	Audio::getFFT();
-	
-	float avg_l_sb, avg_r_sb = 0;
-	float avg_l_b, avg_r_b = 0;
-	float avg_l_lm, avg_r_lm = 0;
-	float avg_l_m, avg_r_m = 0;
-	float avg_l_hm, avg_r_hm = 0;
-	float avg_p = 0;
-	
-	for (uint8_t i = 0; i <= FREQ_86HZ; i++) {
-		avg_l_sb += Audio::last_fft[AUDIO_FFT_LEFT][i];
-		avg_r_sb += Audio::last_fft[AUDIO_FFT_RIGHT][i];
-	}
 
-	avg_l_sb /= FREQ_86HZ;
-	avg_r_sb /= FREQ_86HZ;
-	
-	for (uint8_t i = FREQ_129HZ; i <= FREQ_258HZ; i++) {
-		avg_l_b += Audio::last_fft[AUDIO_FFT_LEFT][i];
-		avg_r_b += Audio::last_fft[AUDIO_FFT_RIGHT][i];
-	}
+	float* avgs_sb = Audio::averageDualFFTRange(FREQ_0HZ, FREQ_86HZ);
+	float* avgs_b = Audio::averageDualFFTRange(FREQ_129HZ, FREQ_258HZ);
+	float* avgs_lm = Audio::averageDualFFTRange(FREQ_258HZ, FREQ_516HZ);
+	float* avgs_m = Audio::averageDualFFTRangeUnbalanced(FREQ_516HZ, FREQ_2021HZ, 15);
+	float* avgs_hm = Audio::averageDualFFTRangeUnbalanced(FREQ_2021HZ, FREQ_3999HZ, 6);
+	float avg_p = Audio::averageFFTRangeUnbalanced(AUDIO_FFT_COMBINED, FREQ_2021HZ, FREQ_3999HZ, 12);
 
-	avg_l_b /= FREQ_258HZ - FREQ_129HZ + 1;
-	avg_r_b /= FREQ_258HZ - FREQ_129HZ + 1;
-	
-	for (uint8_t i = FREQ_258HZ; i <= FREQ_516HZ; i++) {
-		avg_l_lm += Audio::last_fft[AUDIO_FFT_LEFT][i];
-		avg_r_lm += Audio::last_fft[AUDIO_FFT_RIGHT][i];
-	}
+	uint8_t out_l_sb = Audio::fftToInt(avgs_sb[0], 6, quadraticBrightness);
+	uint8_t out_r_sb = Audio::fftToInt(avgs_sb[1], 6, quadraticBrightness);
 
-	avg_l_lm /= FREQ_516HZ - FREQ_258HZ + 1;
-	avg_r_lm /= FREQ_516HZ - FREQ_258HZ + 1;
-	
-	for (uint8_t i = FREQ_516HZ; i <= FREQ_2021HZ; i++) {
-		avg_l_m += Audio::last_fft[AUDIO_FFT_LEFT][i];
-		avg_r_m += Audio::last_fft[AUDIO_FFT_RIGHT][i];
-	}
+	uint8_t out_l_b = Audio::fftToInt(avgs_b[0], 6, quadraticBrightness);
+	uint8_t out_r_b = Audio::fftToInt(avgs_b[1], 6, quadraticBrightness);
 
-	avg_l_m /= 15;
-	avg_r_m /= 15;
-	
-	for (uint8_t i = FREQ_2021HZ; i <= FREQ_3999HZ; i++) {
-		avg_l_hm += Audio::last_fft[AUDIO_FFT_LEFT][i];
-		avg_r_hm += Audio::last_fft[AUDIO_FFT_RIGHT][i];
-	}
+	uint8_t out_l_lm = Audio::fftToInt(avgs_lm[0], 6, quadraticBrightness);
+	uint8_t out_r_lm = Audio::fftToInt(avgs_lm[1], 6, quadraticBrightness);
 
-	avg_l_hm /= 6;
-	avg_r_hm /= 6;
-	
-	for (uint8_t i = FREQ_4042HZ; i <= FREQ_6020HZ; i++) {
-		avg_p += Audio::last_fft[AUDIO_FFT_LEFT][i];
-		avg_p += Audio::last_fft[AUDIO_FFT_RIGHT][i];
-	}
+	uint8_t out_l_m = Audio::fftToInt(avgs_m[0], 6, quadraticBrightness);
+	uint8_t out_r_m = Audio::fftToInt(avgs_m[1], 6, quadraticBrightness);
 
-	avg_p /= 12;
+	uint8_t out_l_hm = Audio::fftToInt(avgs_hm[0], 6, quadraticBrightness);
+	uint8_t out_r_hm = Audio::fftToInt(avgs_hm[1], 6, quadraticBrightness);
 
-	uint8_t out_l_sb = (uint8_t) cubicBrightness((uint64_t) (avg_l_sb * 6 * 255.0));
-	uint8_t out_r_sb = (uint8_t) cubicBrightness((uint64_t) (avg_r_sb * 6 * 255.0));
-
-	uint8_t out_l_b = (uint8_t) cubicBrightness((uint64_t) (avg_l_b * 6 * 255.0));
-	uint8_t out_r_b = (uint8_t) cubicBrightness((uint64_t) (avg_r_b * 6 * 255.0));
-
-	uint8_t out_l_lm = (uint8_t) cubicBrightness((uint64_t) (avg_l_lm * 6 * 255.0));
-	uint8_t out_r_lm = (uint8_t) cubicBrightness((uint64_t) (avg_r_lm * 6 * 255.0));
-
-	uint8_t out_l_m = (uint8_t) cubicBrightness((uint64_t) (avg_l_m * 6 * 255.0));
-	uint8_t out_r_m = (uint8_t) cubicBrightness((uint64_t) (avg_r_m * 6 * 255.0));
-
-	uint8_t out_l_hm = (uint8_t) cubicBrightness((uint64_t) (avg_l_hm * 6 * 255.0));
-	uint8_t out_r_hm = (uint8_t) cubicBrightness((uint64_t) (avg_r_hm * 6 * 255.0));
-
-	uint8_t out_p = (uint8_t) cubicBrightness((uint64_t) (avg_p * 6 * 255.0));
+	uint8_t out_p = Audio::fftToInt(avg_p, 6, quadraticBrightness);
 
 	lcm->setZone(zone_t::LEFT, out_l_sb, out_l_sb, 0);
 	lcm->setZone(zone_t::RIGHT, out_r_sb, out_r_sb, 0);

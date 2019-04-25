@@ -226,4 +226,6 @@ float* Audio::averageDualFFTRangeUnbalanced(uint16_t bin_start, uint16_t bin_end
  * @param brightness_transform This allows transformation of the output before returning
  * @return uint8_t 0 to 255 for LED control
  */
-uint8_t Audio::fftToInt(float bin, float scale_factor, uint8_t (*brightness_transform)(uint64_t)) { return (uint8_t) round(bin * 255); }
+uint8_t Audio::fftToInt(float bin, float scale_factor, uint8_t (*brightness_transform)(uint8_t)) { 
+	return brightness_transform((uint8_t) round(bin * scale_factor * 255.0)); 
+}

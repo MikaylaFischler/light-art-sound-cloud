@@ -36,7 +36,7 @@ public:
 	static float* averageDualFFTRange(uint16_t bin_start, uint16_t bin_end);
 	static float* averageDualFFTRangeUnbalanced(uint16_t bin_start, uint16_t bin_end, float division_factor);
 
-	static uint8_t fftToInt(float bin, float scale_factor, uint8_t (*brightness_transform)(uint64_t));
+	static uint8_t fftToInt(float bin, float scale_factor, uint8_t (*brightness_transform)(uint8_t));
 private:
 	static uint8_t ready;
 	Audio(void) {};
