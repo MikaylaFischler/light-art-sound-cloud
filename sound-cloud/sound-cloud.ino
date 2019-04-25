@@ -7,12 +7,14 @@
 #include "io/io.h"
 #include "io/config.h"
 #include "led/LEDCloudMatrix.hpp"
+#include "led/LEDCloudControl.hpp"
 #include "led/Animations.hpp"
 
 // the arduino IDE struggles with C files nested in folders
 #include "audio/Audio.cpp"
 #include "io/io.c"
 #include "led/LEDCloudMatrix.cpp"
+#include "led/LEDCloudControl.cpp"
 #include "led/Animations.cpp"
 #include "led/Animations.Standby.cpp"
 #include "led/Animations.Simple.cpp"

@@ -7,6 +7,7 @@
 #include "color.h"
 #include "../audio/Audio.hpp"
 #include "LEDCloudMatrix.hpp"
+#include "LEDCloudControl.hpp"
 
 using namespace LEDCloudMatrix;
 
