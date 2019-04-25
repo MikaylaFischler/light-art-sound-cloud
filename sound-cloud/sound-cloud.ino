@@ -24,6 +24,8 @@ Adafruit_NeoPixel row_3_4_led_strip(ROW_3_4_LED_LENGTH, ROW_3_4_LED_STRIP_PIN, N
 Adafruit_NeoPixel top_led_strip(TOP_LED_LENGTH, TOP_LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 LEDCloudControl* led_ctrl;
 
+uint8_t last_mode = 0;
+
 void setup() {
 	// initilize mode button interrupt
 	io_init_mode_control();
@@ -103,8 +105,22 @@ void setup() {
 }
 
 void loop() {
-	// Animations::diagnostics();
-	Animations::Simple::bassTreblePulse();
+	uint8_t mode = io_get_mode();
 
-	// Animations::Standby::solidSoftWhite();
+	switch (mode) {
+		case LED_MODE_BASS_SIDE_PULSE:
+			Animations::Simple::bassSidePulse();
+			break;
+		case LED_MODE_BASS_RANGE_PULSE:
+			Animations::Simple::bassRangePulse();
+			break;
+		case LED_MODE_BASS_TREBLE_PULSE:
+			Animations::Simple::bassTreblePulse();
+			break;
+	}
+
+	if (last_mode != mode) {
+		Animations::allOff();
+		last_mode = mode;
+	}
 }
