@@ -110,8 +110,8 @@ float** Audio::getFFTWhenReadyBlocking(void) {
  * @return float The average of the FFT range
  */
 float Audio::averageFFTRange(uint8_t side, uint16_t bin_start, uint16_t bin_end) {
-	if (bin_start > 511) { bin_start == 511; }
-	if (bin_end > 511) { bin_end == 511; }
+	if (bin_start > 511) { bin_start = 511; }
+	if (bin_end > 511) { bin_end = 511; }
 
 	float avg = 0.0;
 
@@ -143,8 +143,8 @@ float Audio::averageFFTRange(uint8_t side, uint16_t bin_start, uint16_t bin_end)
  * @return float The scaled 'pseudo-average' of the FFT range
  */
 float Audio::averageFFTRangeUnbalanced(uint8_t side, uint16_t bin_start, uint16_t bin_end, float division_factor) {
-	if (bin_start > 511) { bin_start == 511; }
-	if (bin_end > 511) { bin_end == 511; }
+	if (bin_start > 511) { bin_start = 511; }
+	if (bin_end > 511) { bin_end = 511; }
 
 	float avg = 0.0;
 
@@ -176,8 +176,8 @@ float Audio::averageFFTRangeUnbalanced(uint8_t side, uint16_t bin_start, uint16_
  * @return float The scaled 'pseudo-average' of the FFT range [left, right]
  */
 float* Audio::averageDualFFTRange(uint16_t bin_start, uint16_t bin_end) {
-	if (bin_start > 511) { bin_start == 511; }
-	if (bin_end > 511) { bin_end == 511; }
+	if (bin_start > 511) { bin_start = 511; }
+	if (bin_end > 511) { bin_end = 511; }
 
 	static float avgs[2] = { 0.0, 0.0 };
 
@@ -202,8 +202,8 @@ float* Audio::averageDualFFTRange(uint16_t bin_start, uint16_t bin_end) {
  * @return float* The scaled 'pseudo-averages' of the FFT range [left, right]
  */
 float* Audio::averageDualFFTRangeUnbalanced(uint16_t bin_start, uint16_t bin_end, float division_factor) {
-	if (bin_start > 511) { bin_start == 511; }
-	if (bin_end > 511) { bin_end == 511; }
+	if (bin_start > 511) { bin_start = 511; }
+	if (bin_end > 511) { bin_end = 511; }
 
 	static float avgs[2] = { 0.0, 0.0 };
 
