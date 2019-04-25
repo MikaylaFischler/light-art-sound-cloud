@@ -16,12 +16,15 @@ uint8_t Audio::ready = 0;
  */
 void Audio::init(void) {
 	if (!ready) {
+		// allocate audio memory
+		AudioMemory(20);
+
 		// create objects for audio processing
 		board = new AudioControlSGTL5000();
 		input = new AudioInputI2S();
 		fft_l = new AudioAnalyzeFFT1024();
 		fft_r = new AudioAnalyzeFFT1024();
-		fft_l_conn = new AudioConnection(*input, 1, *fft_l, 0);
+		fft_l_conn = new AudioConnection(*input, 0, *fft_l, 0);
 		fft_r_conn = new AudioConnection(*input, 0, *fft_r, 0);
 
 		// last FFT data set
