@@ -104,7 +104,7 @@ void setup() {
 
 void loop() {
 	// Animations::diagnostics();
-	Animations::Simple::bassRangePulse();
+	Animations::Simple::bassTreblePulse();
 
 	// Animations::Standby::solidSoftWhite();
 }

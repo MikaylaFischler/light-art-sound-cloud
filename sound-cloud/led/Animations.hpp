@@ -31,7 +31,8 @@ class Animations {
 			public:
 				static void baseSidePulse(void);
 				static void bassRangePulse(void);
-				// static void bassTreblePulse(void);
+				static void bassTreblePulse(void);
+				// static void fullRangeDisplay(void);
 				// static void noteFlash(void);
 				// static void linearVisualizer3D(void);
 		};
