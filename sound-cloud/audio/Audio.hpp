@@ -11,7 +11,8 @@
 #include "freq_map.h"
 
 #define AUDIO_FFT_LEFT 0
-#define AUDIO_FFT_RIGHT 0
+#define AUDIO_FFT_RIGHT 1
+#define AUDIO_FFT_COMBINED 2
 
 class Audio {
 public:
@@ -21,21 +22,36 @@ public:
 	static AudioAnalyzeFFT1024* fft_r;
 	static AudioConnection* fft_l_conn;
 	static AudioConnection* fft_r_conn;
+	
 	static float** last_fft;
+	static float*** fft_history;
 
 	static void init(void);
 
+	static void enableHysteresis(void);
+	static void disableHysteresis(void);
+
 	static float** getFFT(void);
-	static uint8_t fftToInt(float bin);
+	static float** getFFTWhenReady(void);
+	static float** getFFTWhenReadyBlocking(void);
+
+	static float averageFFTRange(uint8_t side, uint16_t bin_start, uint16_t bin_end);
+	static float averageFFTRangeUnbalanced(uint8_t side, uint16_t bin_start, uint16_t bin_end, float division_factor);
+	
+	static float* averageDualFFTRange(uint16_t bin_start, uint16_t bin_end);
+	static float* averageDualFFTRangeUnbalanced(uint16_t bin_start, uint16_t bin_end, float division_factor);
+
+	static uint8_t fftToInt(float bin, float scale_factor, uint8_t (*brightness_transform)(uint8_t));
 private:
 	static uint8_t ready;
+	static uint8_t hysteresis;
+
+	static uint8_t h_idx;
+
+	static void __read_fft(void);
+
 	Audio(void) {};
 	~Audio(void) {};
 };
-
-// AudioAnalyzeRMS rms1;
-// AudioAnalyzePeak peak1;
-// AudioAnalyzeNoteFrequency notefreq1;
-// AudioAnalyzeToneDetect tone1;
 
 #endif

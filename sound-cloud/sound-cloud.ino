@@ -7,14 +7,18 @@
 #include "io/io.h"
 #include "io/config.h"
 #include "led/LEDCloudMatrix.hpp"
+#include "led/LEDCloudControl.hpp"
 #include "led/Animations.hpp"
 
 // the arduino IDE struggles with C files nested in folders
 #include "audio/Audio.cpp"
 #include "io/io.c"
 #include "led/LEDCloudMatrix.cpp"
+#include "led/LEDCloudControl.cpp"
 #include "led/Animations.cpp"
 #include "led/Animations.Standby.cpp"
+#include "led/Animations.Simple.cpp"
+#include "led/Animations.Advanced.cpp"
 
 using namespace LEDCloudMatrix;
 
@@ -22,6 +26,8 @@ Adafruit_NeoPixel row_1_2_led_strip(ROW_1_2_LED_LENGTH, ROW_1_2_LED_STRIP_PIN, N
 Adafruit_NeoPixel row_3_4_led_strip(ROW_3_4_LED_LENGTH, ROW_3_4_LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 Adafruit_NeoPixel top_led_strip(TOP_LED_LENGTH, TOP_LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 LEDCloudControl* led_ctrl;
+
+uint8_t last_mode = 0;
 
 void setup() {
 	// initilize mode button interrupt
@@ -102,10 +108,24 @@ void setup() {
 }
 
 void loop() {
-	// Serial.println(led_ctrl->levelLength(0));
+	// uint8_t mode = io_get_mode();
 
-	Animations::diagnostics();
+	// switch (mode) {
+	// 	case LED_MODE_BASS_SIDE_PULSE:
+	// 		Animations::Simple::bassSidePulse();
+	// 		break;
+	// 	case LED_MODE_BASS_RANGE_PULSE:
+	// 		Animations::Simple::bassRangePulse();
+	// 		break;
+	// 	case LED_MODE_BASS_TREBLE_PULSE:
+	// 		Animations::Simple::bassTreblePulse();
+	// 		break;
+	// }
 
-	// Animations::Standby::solidSoftWhite();
-	// Serial.println("HEARTBEAT");
+	// if (last_mode != mode) {
+	// 	Animations::allOff();
+	// 	last_mode = mode;
+	// }
+
+	Animations::Advanced::fireLinearVisualizer3D();
 }
