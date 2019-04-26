@@ -7,8 +7,11 @@ AudioAnalyzeFFT1024* Audio::fft_r = NULL;
 AudioConnection* Audio::fft_l_conn = NULL;
 AudioConnection* Audio::fft_r_conn = NULL;
 float** Audio::last_fft = NULL;
+float*** Audio::fft_history = NULL;
 
 uint8_t Audio::ready = 0;
+uint8_t Audio::hysteresis = 0;
+uint8_t Audio::h_idx = 0;
 
 /**
  * @brief Initialize the audio system
@@ -32,6 +35,18 @@ void Audio::init(void) {
 		last_fft[AUDIO_FFT_LEFT] = (float*) malloc(sizeof(float) * 512);
 		last_fft[AUDIO_FFT_RIGHT] = (float*) malloc(sizeof(float) * 512);
 
+		// historical FFT data set
+		fft_history = (float***) malloc(sizeof(float**) * 2);
+		fft_history[AUDIO_FFT_LEFT] = (float**) malloc(sizeof(float*) * 512);
+		fft_history[AUDIO_FFT_RIGHT] = (float**) malloc(sizeof(float*) * 512);
+
+		for (uint16_t i = 0; i < 512; i++) {
+			fft_history[AUDIO_FFT_LEFT][i] = (float*) calloc(sizeof(float), 3);
+			fft_history[AUDIO_FFT_RIGHT][i] = (float*) calloc(sizeof(float),  3);
+		}
+
+		disableHysteresis();
+
 		// setup board
 		board->enable();
 		board->inputSelect(AUDIO_INPUT_LINEIN);
@@ -40,6 +55,49 @@ void Audio::init(void) {
 
 		ready = 1;
 	}
+}
+
+/**
+ * @brief Enable hysteresis (readings will be average of last 3 values)
+ * 
+ */
+void Audio::enableHysteresis(void) { hysteresis = 1; }
+
+/**
+ * @brief Disable hysteresis (readings will no longer be average of last 3 values)
+ * 
+ */
+void Audio::disableHysteresis(void) { hysteresis = 0; }
+
+/**
+ * @brief Read the FFT into Audio's buffer, averaging if requested
+ * 
+ */
+void Audio::__read_fft(void) {
+	// read data
+	for (uint16_t i = 0; i < 512; i++) {
+		fft_history[AUDIO_FFT_LEFT][i][h_idx] = fft_l->read(i);
+		fft_history[AUDIO_FFT_RIGHT][i][h_idx] = fft_r->read(i);
+	}
+
+	if (hysteresis) {
+		for (uint16_t i = 0; i < 512; i++) {
+			for (uint8_t s = 0; s < 3; s++) {
+				last_fft[AUDIO_FFT_LEFT][i] += fft_history[AUDIO_FFT_LEFT][i][s];
+				last_fft[AUDIO_FFT_RIGHT][i] += fft_history[AUDIO_FFT_RIGHT][i][s];
+			}
+
+			last_fft[AUDIO_FFT_LEFT][i] /= 3.0;
+			last_fft[AUDIO_FFT_RIGHT][i] /= 3.0;
+		}
+	} else {
+		for (uint16_t i = 0; i < 512; i++) {
+			last_fft[AUDIO_FFT_LEFT][i] = fft_history[AUDIO_FFT_LEFT][i][h_idx];
+			last_fft[AUDIO_FFT_RIGHT][i] = fft_history[AUDIO_FFT_RIGHT][i][h_idx];
+		}
+	}
+
+	if (++h_idx > 2) { h_idx = 0; }
 }
 
 /**
@@ -54,10 +112,7 @@ float** Audio::getFFT(void) {
 	}
 
 	// read data
-	for (uint16_t i = 0; i < 512; i++) {
-		last_fft[AUDIO_FFT_LEFT][i] = fft_l->read(i);
-		last_fft[AUDIO_FFT_RIGHT][i] = fft_r->read(i);
-	}
+	__read_fft();
 
 	// return the pointer for ease of use
 	return last_fft;
@@ -73,10 +128,7 @@ float** Audio::getFFTWhenReady(void) {
 	if (!(fft_l->available() && fft_r->available())) { return NULL; }
 
 	// read data
-	for (uint16_t i = 0; i < 512; i++) {
-		last_fft[AUDIO_FFT_LEFT][i] = fft_l->read(i);
-		last_fft[AUDIO_FFT_RIGHT][i] = fft_r->read(i);
-	}
+	__read_fft();
 
 	// return the pointer for ease of use
 	return last_fft;
@@ -92,10 +144,7 @@ float** Audio::getFFTWhenReadyBlocking(void) {
 	while (!(fft_l->available() && fft_r->available())) { __asm__ __volatile__ ("nop\n\t"); }
 
 	// read data
-	for (uint16_t i = 0; i < 512; i++) {
-		last_fft[AUDIO_FFT_LEFT][i] = fft_l->read(i);
-		last_fft[AUDIO_FFT_RIGHT][i] = fft_r->read(i);
-	}
+	__read_fft();
 
 	// return the pointer for ease of use
 	return last_fft;
@@ -226,6 +275,8 @@ float* Audio::averageDualFFTRangeUnbalanced(uint16_t bin_start, uint16_t bin_end
  * @param brightness_transform This allows transformation of the output before returning
  * @return uint8_t 0 to 255 for LED control
  */
-uint8_t Audio::fftToInt(float bin, float scale_factor, uint8_t (*brightness_transform)(uint8_t)) { 
-	return brightness_transform((uint8_t) round(bin * scale_factor * 255.0)); 
+uint8_t Audio::fftToInt(float bin, float scale_factor, uint8_t (*brightness_transform)(uint8_t) = NULL) { 
+	uint8_t converted = (uint8_t) round(bin * scale_factor * 255.0);
+	if (brightness_transform) { converted = brightness_transform(converted); }
+	return converted; 
 }

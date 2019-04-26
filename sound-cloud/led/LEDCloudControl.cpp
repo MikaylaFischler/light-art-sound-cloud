@@ -197,8 +197,8 @@ void LEDCloudControl::mapSegmentToLevel(led_segment_t* segment, uint8_t level) {
  * @param b Blue value
  */
 void LEDCloudControl::setPixelColorByZone(zone_t zone_id, uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
-	if (zones[zone_id].map[x][y].strip_id == -1) { return; }
-	struct px_map* m = &(zones[zone_id].map[x][y]);
+	if (zones[zone_id].map[y][x].strip_id == -1) { return; }
+	struct px_map* m = &(zones[zone_id].map[y][x]);
 	raw_strips[m->strip_id]->setPixelColor(m->offset, r, g, b);
 }
 
@@ -211,8 +211,8 @@ void LEDCloudControl::setPixelColorByZone(zone_t zone_id, uint8_t x, uint8_t y, 
  * @param c 32-bit color
  */
 void LEDCloudControl::setPixelColorByZone(zone_t zone_id, uint8_t x, uint8_t y, uint32_t c) {
-	if (zones[zone_id].map[x][y].strip_id == -1) { return; }
-	struct px_map* m = &(zones[zone_id].map[x][y]);
+	if (zones[zone_id].map[y][x].strip_id == -1) { return; }
+	struct px_map* m = &(zones[zone_id].map[y][x]);
 	raw_strips[m->strip_id]->setPixelColor(m->offset, c);
 }
 

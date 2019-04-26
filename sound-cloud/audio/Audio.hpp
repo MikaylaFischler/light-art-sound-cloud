@@ -22,9 +22,14 @@ public:
 	static AudioAnalyzeFFT1024* fft_r;
 	static AudioConnection* fft_l_conn;
 	static AudioConnection* fft_r_conn;
+	
 	static float** last_fft;
+	static float*** fft_history;
 
 	static void init(void);
+
+	static void enableHysteresis(void);
+	static void disableHysteresis(void);
 
 	static float** getFFT(void);
 	static float** getFFTWhenReady(void);
@@ -39,6 +44,12 @@ public:
 	static uint8_t fftToInt(float bin, float scale_factor, uint8_t (*brightness_transform)(uint8_t));
 private:
 	static uint8_t ready;
+	static uint8_t hysteresis;
+
+	static uint8_t h_idx;
+
+	static void __read_fft(void);
+
 	Audio(void) {};
 	~Audio(void) {};
 };

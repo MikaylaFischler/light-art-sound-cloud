@@ -10,6 +10,7 @@
 
 using namespace LEDCloudMatrix;
 using namespace LEDCloudMatrix::LEDMath;
+using namespace LEDCloudMatrix::LEDColor;
 
 class Animations {
 	public:
@@ -35,11 +36,13 @@ class Animations {
 				static void bassTreblePulse(void);
 				// static void fullRangeDisplay(void);
 				// static void noteFlash(void);
-				// static void linearVisualizer3D(void);
 		};
 
-		class Complex {
+		class Advanced {
 			public:
+				static void solidLinearVisualizer3D(void);
+				static void rainbowLinearVisualizer3D(void);
+				static void fireLinearVisualizer3D(void);
 				// static void bassFlow(void);
 		};
 	private:
@@ -50,7 +53,7 @@ class Animations {
 
 		friend class Animations::Standby;
 		friend class Animations::Simple;
-		friend class Animations::Complex;
+		friend class Animations::Advanced;
 };
 
 #endif

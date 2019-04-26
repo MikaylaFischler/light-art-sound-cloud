@@ -36,6 +36,8 @@ namespace LEDCloudMatrix {
 
 		uint32_t color(uint8_t r, uint8_t g, uint8_t b) ;
 		uint32_t colorWheel(uint8_t wheel_pos);
+
+		uint32_t scaleColorSaturation(uint32_t color, uint8_t scale);
 	};
 };
 

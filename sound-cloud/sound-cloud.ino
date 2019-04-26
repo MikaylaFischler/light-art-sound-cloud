@@ -18,6 +18,7 @@
 #include "led/Animations.cpp"
 #include "led/Animations.Standby.cpp"
 #include "led/Animations.Simple.cpp"
+#include "led/Animations.Advanced.cpp"
 
 using namespace LEDCloudMatrix;
 
@@ -107,22 +108,24 @@ void setup() {
 }
 
 void loop() {
-	uint8_t mode = io_get_mode();
+	// uint8_t mode = io_get_mode();
 
-	switch (mode) {
-		case LED_MODE_BASS_SIDE_PULSE:
-			Animations::Simple::bassSidePulse();
-			break;
-		case LED_MODE_BASS_RANGE_PULSE:
-			Animations::Simple::bassRangePulse();
-			break;
-		case LED_MODE_BASS_TREBLE_PULSE:
-			Animations::Simple::bassTreblePulse();
-			break;
-	}
+	// switch (mode) {
+	// 	case LED_MODE_BASS_SIDE_PULSE:
+	// 		Animations::Simple::bassSidePulse();
+	// 		break;
+	// 	case LED_MODE_BASS_RANGE_PULSE:
+	// 		Animations::Simple::bassRangePulse();
+	// 		break;
+	// 	case LED_MODE_BASS_TREBLE_PULSE:
+	// 		Animations::Simple::bassTreblePulse();
+	// 		break;
+	// }
 
-	if (last_mode != mode) {
-		Animations::allOff();
-		last_mode = mode;
-	}
+	// if (last_mode != mode) {
+	// 	Animations::allOff();
+	// 	last_mode = mode;
+	// }
+
+	Animations::Advanced::fireLinearVisualizer3D();
 }

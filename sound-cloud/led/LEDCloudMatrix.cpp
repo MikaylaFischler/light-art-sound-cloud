@@ -119,3 +119,11 @@ uint32_t LEDCloudMatrix::LEDColor::colorWheel(uint8_t wheel_pos) {
 	wheel_pos -= 170;
 	return LEDCloudMatrix::LEDColor::color(wheel_pos * 3, 255 - wheel_pos * 3, 0);
 }
+
+uint32_t LEDCloudMatrix::LEDColor::scaleColorSaturation(uint32_t color, uint8_t scale) {
+	float s_f = scale / 255.0;
+	uint8_t r = (uint8_t) round((float) redFromColor(color) * s_f);
+	uint8_t g = (uint8_t) round((float) greenFromColor(color) * s_f);
+	uint8_t b = (uint8_t) round((float) blueFromColor(color) * s_f);
+	return LEDColor::color(r, g, b);
+}
