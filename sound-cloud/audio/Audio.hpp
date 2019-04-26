@@ -54,9 +54,4 @@ private:
 	~Audio(void) {};
 };
 
-// AudioAnalyzeRMS rms1;
-// AudioAnalyzePeak peak1;
-// AudioAnalyzeNoteFrequency notefreq1;
-// AudioAnalyzeToneDetect tone1;
-
 #endif

@@ -1,5 +1,9 @@
 #include "Animations.hpp"
 
+/**
+ * @brief Pulse the left and right side in red with the left and right bass ranges, respectively
+ * 
+ */
 void Animations::Simple::bassSidePulse(void) {
 	unsigned long t_1 = micros();
 	Audio::getFFTWhenReadyBlocking();
@@ -17,6 +21,10 @@ void Animations::Simple::bassSidePulse(void) {
 	Serial.println(t_2 - t_1);
 }
 
+/**
+ * @brief Pulse the sides, top, and front with different bass ranges.
+ * 
+ */
 void Animations::Simple::bassRangePulse(void) {
 	unsigned long t_1 = micros();
 	Audio::getFFTWhenReadyBlocking();
@@ -56,6 +64,10 @@ void Animations::Simple::bassRangePulse(void) {
 	Serial.println(t_2 - t_1);
 }
 
+/**
+ * @brief Render sub-bass through high mids across the full cloud
+ * 
+ */
 void Animations::Simple::bassTreblePulse(void) {
 	unsigned long t_1 = micros();
 	// Audio::enableHysteresis();

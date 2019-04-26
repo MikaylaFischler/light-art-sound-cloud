@@ -120,6 +120,13 @@ uint32_t LEDCloudMatrix::LEDColor::colorWheel(uint8_t wheel_pos) {
 	return LEDCloudMatrix::LEDColor::color(wheel_pos * 3, 255 - wheel_pos * 3, 0);
 }
 
+/**
+ * @brief Scale a 32-bit RGB color by a uint8_t value 0-255
+ * 
+ * @param color The 32-bit RGB color
+ * @param scale Integer scale from 0 to 255
+ * @return uint32_t The scaled 32-bit RGB color
+ */
 uint32_t LEDCloudMatrix::LEDColor::scaleColorSaturation(uint32_t color, uint8_t scale) {
 	float s_f = scale / 255.0;
 	uint8_t r = (uint8_t) round((float) redFromColor(color) * s_f);

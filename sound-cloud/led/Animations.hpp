@@ -27,6 +27,9 @@ class Animations {
 				static void cloudToCloudLighting(void);
 				static void rainbowWash(void);
 				static void rainbowFade(void);
+			private:
+				Standby() {};
+				~Standby() {};
 		};
 
 		class Simple {
@@ -36,14 +39,23 @@ class Animations {
 				static void bassTreblePulse(void);
 				// static void fullRangeDisplay(void);
 				// static void noteFlash(void);
+			private:
+				Simple() {};
+				~Simple() {};
 		};
 
 		class Advanced {
 			public:
+				// static void bassFlow(void);
 				static void solidLinearVisualizer3D(void);
 				static void rainbowLinearVisualizer3D(void);
 				static void fireLinearVisualizer3D(void);
-				// static void bassFlow(void);
+			private:
+				Advanced() {};
+				~Advanced() {};
+
+				static void __shift_output_stream(void);
+				static uint8_t output_stream[9][14];
 		};
 	private:
 		Animations() {};
