@@ -1,5 +1,7 @@
 #include "Animations.hpp"
 
+uint8_t Animations::Advanced::output_stream[9][14];
+
 /**
  * @brief Draw a moving vizualizer of audio in blue
  * 
