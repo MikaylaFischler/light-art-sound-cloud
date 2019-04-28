@@ -116,7 +116,7 @@ void Animations::Advanced::fireLinearVisualizer3D(void) {
  * @brief Shift the output stream upwards, making space for new data
  * 
  */
-static void __shift_output_stream(void) {
+void Animations::Advanced::__shift_output_stream(void) {
 	for (uint8_t i = 8; i > 0; i--) {
 		for (uint8_t v = 0; v < 14; v++) {
 			output_stream[i][v] = output_stream[i - 1][v];
