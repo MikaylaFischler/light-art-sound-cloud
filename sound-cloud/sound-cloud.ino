@@ -33,6 +33,10 @@ void setup() {
 	// initilize mode button interrupt
 	io_init_mode_control();
 
+	// initialize status LED
+	io_init_stat_led();
+	io_led_write_starting();
+
 	// initilize audio system
 	Audio::init();
 
@@ -105,27 +109,43 @@ void setup() {
 
 	// ensure all are shown as off
 	led_ctrl->show();
+
+	// show that initialization worked
+	io_led_write_active();
 }
 
 void loop() {
-	// uint8_t mode = io_get_mode();
+	uint8_t mode = io_get_mode();
 
-	// switch (mode) {
-	// 	case LED_MODE_BASS_SIDE_PULSE:
-	// 		Animations::Simple::bassSidePulse();
-	// 		break;
-	// 	case LED_MODE_BASS_RANGE_PULSE:
-	// 		Animations::Simple::bassRangePulse();
-	// 		break;
-	// 	case LED_MODE_BASS_TREBLE_PULSE:
-	// 		Animations::Simple::bassTreblePulse();
-	// 		break;
-	// }
+	// execute animation based on current mode
+	switch (mode) {
+		case LED_MODE_BASS_SIDE_PULSE:
+			Animations::Simple::bassSidePulse();
+			break;
+		case LED_MODE_BASS_RANGE_PULSE:
+			Animations::Simple::bassRangePulse();
+			break;
+		case LED_MODE_BASS_TREBLE_PULSE:
+			Animations::Simple::bassTreblePulse();
+			break;
+		case LED_MODE_LINEAR_VISUALIZER_RAINBOW:
+			Animations::Advanced::rainbowLinearVisualizer3D();	
+			break;
+		case LED_MODE_LINEAR_VISUALIZER_FIRE:
+			Animations::Advanced::fireLinearVisualizer3D();	
+			break;
+	}
 
-	// if (last_mode != mode) {
-	// 	Animations::allOff();
-	// 	last_mode = mode;
-	// }
+	if (last_mode != mode) {
+		// light status blue to indicate state change
+		io_led_write_changing();
 
-	Animations::Advanced::fireLinearVisualizer3D();
+		// clear all LEDs and update last mode
+		Animations::allOff();
+		last_mode = mode;
+		delay(100);
+
+		// return to running status
+		io_led_write_active();
+	}
 }
