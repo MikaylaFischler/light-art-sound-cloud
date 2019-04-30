@@ -72,11 +72,13 @@ void setup() {
 	led_segment_t* z_1__0 = led_ctrl->createSegment(strip_t::S_R12, 5, 12);
 	led_segment_t* z_1__1 = led_ctrl->createSegment(strip_t::S_R12, 28, 13);
 	led_segment_t* z_1__2 = led_ctrl->createSegment(strip_t::S_R34, 1, 13);
-	led_segment_t* z_1__3 = led_ctrl->createSegment(strip_t::S_R34, 24, 12);
+	led_segment_t* z_1__3 = led_ctrl->createSegment(strip_t::S_R34, 24, 11);
+	led_segment_t* z_1__4 = led_ctrl->createSegment(strip_t::S_R34, 35, 1);
 	led_ctrl->mapSegmentToZone(z_1__0, zone_t::FRONT, 0, 0, seg_o_t::ROW_POS);
 	led_ctrl->mapSegmentToZone(z_1__1, zone_t::FRONT, 1, 12, seg_o_t::ROW_NEG);
 	led_ctrl->mapSegmentToZone(z_1__2, zone_t::FRONT, 2, 0, seg_o_t::ROW_POS);
 	led_ctrl->mapSegmentToZone(z_1__3, zone_t::FRONT, 3, 0, seg_o_t::ROW_POS);
+	led_ctrl->mapSegmentToZone(z_1__4, zone_t::FRONT, 3, 12, seg_o_t::ROW_POS);
 
 	// left zone
 	led_segment_t* z_2__0 = led_ctrl->createSegment(strip_t::S_R12, 17, 6);
